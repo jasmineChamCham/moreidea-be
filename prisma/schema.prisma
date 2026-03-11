@@ -1,0 +1,82 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+generator nestjsDto {
+  provider        = "prisma-generator-nestjs-dto"
+  output          = "../src/generated"
+  createDtoPrefix = "Create"
+  updateDtoPrefix = "Update"
+  dtoSuffix       = "Dto"
+  entityPrefix    = ""
+  entitySuffix    = "Entity"
+  classValidation = "true"
+  fileNamingStyle = "kebab"
+  outputType      = "class"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Mentor {
+  id          String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name        String   @unique
+  style       String
+  bgVibe      String?  @map("bg_vibe")
+  cameraAngle String?  @map("camera_angle")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("mentors")
+}
+
+enum SourceType {
+  book
+  video
+
+  @@map("source_type")
+}
+
+model BookVideoSource {
+  id          String     @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sourceTitle String     @map("source_title")
+  sourceType  SourceType @map("source_type")
+  creator     String?
+  sourceUrl   String?    @map("source_url")
+  filePath    String?    @map("file_path")
+  createdAt   DateTime   @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime   @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  ideas SourceIdea[]
+
+  @@map("book_video_sources")
+}
+
+model SourceIdea {
+  id         String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  sourceId   String   @map("source_id") @db.Uuid
+  ideaText   String   @map("idea_text")
+  core       String?
+  importance String?
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  source BookVideoSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+
+  @@index([sourceId])
+  @@map("source_ideas")
+}
+
+model FavouriteIdea {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  person    String
+  quote     String
+  place     String?
+  photoUrl  String?  @map("photo_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("favourite_ideas")
+}
