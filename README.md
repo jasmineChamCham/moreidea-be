@@ -1,49 +1,68 @@
-# MoreIdea (Empathy AI)
+<p align="center">
+  <img src="./assets/moreidea_banner.png" alt="MoreIdea Banner" width="100%">
+</p>
 
-MoreIdea is a comprehensive knowledge management platform designed specially for continuous learners, researchers, and creators. It goes beyond simple note-taking by providing a structured environment to manage, store, and explore profound ideas, philosophies, and quotes from various sources and mentors.
+<h1 align="center">✨ MoreIdea (Empathy AI) ✨</h1>
 
-## 🌟 Project Purpose
+<p align="center">
+  <strong>The intelligent "Second Brain" for Wisdom Weavers and Lifelong Learners.</strong>
+</p>
 
-In an age of information overload, we consume countless books, podcasts, articles, and videos, yet often fail to retain or apply the core wisdom they hold. The purpose of **MoreIdea** is to bridge the gap between passive consumption and active application. It provides a centralized, structured repository where users can systematically capture ideas, break them down into their core meanings, and map out exactly how to apply them in real life. By connecting these ideas to specific sources and mentors, the platform ensures that valuable knowledge is never lost but easily accessible when needed.
-
-## 🔭 Vision
-
-Our vision is to build an intelligent "second brain" that acts as a personalized wisdom weaver. We want to empower users not just to store data, but to internalize philosophies through the unique lenses of different mentors and archetypes. By capturing the essence of an idea—along with the speaking style, mindset, and body language of the mentor who shared it—MoreIdea aims to foster deeper empathy and understanding, ultimately helping users transform external knowledge into personal growth and actionable insight.
-
-## 💡 Application & Use Cases
-
-MoreIdea is built for practical, everyday use by knowledge workers, coaches, and lifelong learners. Its core applications include:
-
-- **Source & Idea Extraction**: Log the books you read, videos you watch, or podcasts you listen to, and extract specific ideas. For each idea, define its core essence, importance, practical application, and real-world examples.
-- **Mentor Tracking**: Create profiles for different mentors, thought leaders, or historical figures. Track not just their quotes and topics, but their unique philosophy, mindset, teaching style, and archetype.
-- **Thematic Categorization**: Organize ideas and mentors by topics, creating an interconnected web of knowledge that makes it easy to find cross-disciplinary insights.
-- **Personalization**: Users can customize their profiles with personality frameworks (MBTI, Zodiac, Love Languages) to potentially tailor how information and mentorship resonate with them.
+<p align="center">
+  <img src="https://img.shields.io/badge/NestJS-E0234E?style=for-the-badge&logo=nestjs&logoColor=white" alt="NestJS">
+  <img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript">
+  <img src="https://img.shields.io/badge/Prisma-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma">
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL">
+</p>
 
 ---
 
-## 🛠 Tech Stack
+## 🌟 The Pulse of MoreIdea
 
-- **Framework**: [NestJS](https://nestjs.com/)
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Architecture**: CQRS Pattern (Command Query Responsibility Segregation)
-- **Database ORM**: [Prisma](https://www.prisma.io/)
-- **Database**: [PostgreSQL](https://www.postgresql.org/)
-- **Authentication**: Passport.js (JWT, Local, Google OAuth2)
-- **Deployment**: Firebase Functions Ready
+In a world drowning in data but starving for wisdom, **MoreIdea** isn't just another note-taking app—it's a **wisdom refinery**. We consume books, podcasts, and videos at lightning speed, but how much actually sticks? How much changes who we are?
+
+> [!IMPORTANT]
+> **The Mission**: To bridge the gap between passive consumption and active transformation. MoreIdea helps you distill raw information into applied brilliance.
+
+### 🔭 Our Vision: The Wisdom Weaver
+We are building a personalized **Empathy AI**—a "second brain" that doesn't just store facts, but understands the *soul* of an idea. By weaving together the mindset, philosophy, and archetype of the mentors you admire, MoreIdea empowers you to see the world through their eyes, helping you transform external knowledge into deep personal growth.
+
+---
+
+## 💡 Where Wisdom Meets Action
+
+MoreIdea is designed for the modern creator, researcher, and coach. It turns "I read that somewhere" into "Here is how I apply this today."
+
+- **💎 Idea Alchemy**: Don't just save quotes. Extract the core essence, define its weight, and map out concrete, real-world examples for application.
+- **🎭 Mentor Archetypes**: Go beyond the bio. Track the unique philosophy, mindset, and teaching style of your mentors. Whether it's a historical giant or a modern thought leader, capture their "vibe."
+- **🕸️ Interconnected Wisdom**: Create a living web of knowledge. See how a Stoic philosophy from 2000 years ago connects to a modern UX design principle. 
+- **🎨 Personalization Stack**: Integrate your own personality frameworks (MBTI, Zodiac, Love Languages) to see how wisdom resonates uniquely with *you*.
+
+---
+
+## 🛠 Project Blueprint
+
+Built with a high-performance, scalable back-end architecture to ensure your wisdom is always protected and accessible.
+
+- **Framework**: [NestJS](https://nestjs.com/) (The scalability champion)
+- **Engine**: [TypeScript](https://www.typescriptlang.org/) (Static typing for zero-loss data)
+- **Design Strategy**: **CQRS Pattern** (Clean separation of concerns)
+- **Data Layer**: [Prisma](https://www.prisma.io/) & [PostgreSQL](https://www.postgresql.org/)
+- **Gatekeeper**: Passport.js (JWT, Google OAuth2)
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-
 - **Node.js**: v18.x or higher
 - **PostgreSQL**: v14.x or higher
-- **npm** or **yarn**
 
 ### Installation
 
 1. **Clone the repository**:
    ```bash
-   git clone <repository-url>
+   git clone [<repository-url>](https://github.com/jasmineChamCham/moreidea-be)
    cd moreidea-be
    ```
 
@@ -53,51 +72,40 @@ MoreIdea is built for practical, everyday use by knowledge workers, coaches, and
    ```
 
 3. **Configure Environment**:
-   Create a `.env` file in the root directory and fill in your credentials:
-   ```env
-   # Database
-   DATABASE_URL="postgresql://user:password@localhost:5432/moreidea?schema=public"
+   Create a `.env` file and define your `DATABASE_URL` and `JWT_SECRET`.
 
-   # JWT & Auth Secrets
-   JWT_SECRET="your_jwt_secret"
-   ```
-
-## 🗄 Database Setup
-
-MoreIdea uses Prisma for robust schema management and type safety.
+### 🗄 Database Lifecycle
 
 ```bash
-# Generate Prisma Client and NestJS DTOs
+# Generate Client & DTOs
 npm run prisma:g
 
-# Apply migrations to the development database
+# Apply Migrations
 npm run prisma:m
 
-# Reset database (Deletes all data)
+# Reset (Careful!)
 npm run prisma:reset
 ```
 
-## ▶️ Running the Application
+### ▶️ Orchestration
 
 ```bash
-# Development mode (watch)
-npm run dev
-
-# Starts the application
-npm run start
-
-# Production build
-npm run build
-
-# Start production server
-npm run start:prod
+npm run dev        # Watch mode for developers
+npm run build      # Prepare for production
+npm run start:prod # Launch the engine
 ```
 
-## 📝 Scripts
+---
 
-- `npm run lint` - Lints the codebase using ESLint.
-- `npm run format` - Formats the codebase using Prettier.
-- `npm run test` - Runs unit tests.
-- `npm run test:e2e` - Runs end-to-end tests.
-- `npm run serve` - Builds and serves the application locally via Firebase emulators.
-- `npm run deploy` - Deploys to Firebase Functions.
+## 📝 Vital Scripts
+
+- `npm run lint` - Maintain code elegance.
+- `npm run format` - Keep the structure pristine.
+- `npm run test` - Ensure core logic remains unbreakable.
+- `npm run deploy` - Scale to the sky via Firebase.
+
+---
+
+<p align="center">
+  Made with ❤️ for the seekers of wisdom.
+</p>
