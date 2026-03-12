@@ -22,14 +22,6 @@ export class CreateMentorDto {
   })
   @IsOptional()
   @IsString()
-  avatarUrl?: string | null;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsString()
   philosophy?: string | null;
   @ApiProperty({
     type: 'string',
