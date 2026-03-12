@@ -134,6 +134,7 @@ model Token {
 model Mentor {
   id   String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name String @unique
+  avatarUrl String? @map("avatar_url")
 
   philosophy    String?
   mindset       String?

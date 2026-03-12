@@ -67,6 +67,7 @@ async function main() {
     update: {},
     create: {
       name: 'Robert Greene',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/7/7a/Robert_Greene_2011.jpg',
       archetype: 'Strategist',
       philosophy:
         'Human behavior is driven by hidden motives and power dynamics. Understanding human nature allows strategic navigation of life.',
@@ -85,6 +86,7 @@ async function main() {
     update: {},
     create: {
       name: 'Codie Sanchez',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/5/5c/Codie_Sanchez.jpg',
       archetype: 'Operator',
       philosophy:
         'Financial independence comes from owning assets that produce cash flow.',
@@ -102,6 +104,7 @@ async function main() {
     update: {},
     create: {
       name: 'Mel Robbins',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/0/0f/Mel_Robbins_2019.jpg',
       archetype: 'Activator',
       philosophy: 'Action creates motivation.',
       mindset: 'Behavioral activation',
@@ -118,6 +121,7 @@ async function main() {
     update: {},
     create: {
       name: 'Jay Shetty',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/3/3c/Jay_Shetty_2020.jpg',
       archetype: 'Monk',
       philosophy: 'Purpose and mindfulness create a meaningful life.',
       mindset: 'Spiritual self development',
@@ -134,6 +138,7 @@ async function main() {
     update: {},
     create: {
       name: 'Carl Jung',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/6/6f/Carl_Gustav_Jung.jpg',
       archetype: 'Mystic',
       philosophy:
         'The unconscious mind shapes personality and behavior through archetypes and the shadow.',
@@ -151,6 +156,7 @@ async function main() {
     update: {},
     create: {
       name: 'Jordan Peterson',
+      avatarUrl: 'https://upload.wikimedia.org/wikipedia/commons/1/1d/Jordan_Peterson_2018.jpg',
       archetype: 'Philosopher',
       philosophy:
         'Meaning in life comes from responsibility, discipline, and confronting chaos.',

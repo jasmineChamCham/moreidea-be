@@ -5,9 +5,24 @@ export class CreateMentorDto {
   @ApiProperty({
     type: 'string',
   })
-  @IsNotEmpty()
   @IsString()
   name: string;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string | null;
   @ApiProperty({
     type: 'string',
     required: false,

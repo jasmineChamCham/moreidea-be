@@ -13,6 +13,11 @@ export class MentorDto {
     type: 'string',
     nullable: true,
   })
+  avatarUrl: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
   philosophy: string | null;
   @ApiProperty({
     type: 'string',

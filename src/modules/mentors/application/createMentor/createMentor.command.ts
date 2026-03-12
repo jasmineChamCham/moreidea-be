@@ -9,6 +9,16 @@ export class CreateMentorDto {
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
+  avatarUrl?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  avatarUrl?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
   philosophy?: string;
 
   @ApiProperty({ required: false })
