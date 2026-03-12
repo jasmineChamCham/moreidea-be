@@ -13,9 +13,12 @@ export class CreateSourceIdeaHandler
     return this.dbContext.sourceIdea.create({
       data: {
         sourceId,
+        topicId: dto.topicId ?? null,
         ideaText: dto.ideaText,
         core: dto.core ?? null,
         importance: dto.importance ?? null,
+        application: dto.application ?? null,
+        example: dto.example ?? null,
       },
     });
   }

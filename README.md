@@ -1,39 +1,32 @@
-# MoreIdea Backend
+# MoreIdea (Empathy AI)
 
-MoreIdea is a platform designed to manage, store, and explore ideas from various sources such as books and videos. It also features a mentor tracking system and a repository for favourite quotes and ideas. This repository contains the NestJS-based backend API that powers the MoreIdea platform.
+MoreIdea is a comprehensive knowledge management platform designed specially for continuous learners, researchers, and creators. It goes beyond simple note-taking by providing a structured environment to manage, store, and explore profound ideas, philosophies, and quotes from various sources and mentors.
 
-## 📋 Table of Contents
+## 🌟 Project Purpose
 
-- [Overview](#-overview)
-- [✨ Features](#-features)
-- [🛠 Tech Stack](#-tech-stack)
-- [🚀 Getting Started](#-getting-started)
-  - [Prerequisites](#prerequisites)
-  - [Installation](#installation)
-- [🔐 Environment Variables](#-environment-variables)
-- [🗄 Database Setup](#-database-setup)
-  - [Running Migrations](#running-migrations)
-- [▶️ Running the Application](#️-running-the-application)
-- [📝 Scripts](#-scripts)
+In an age of information overload, we consume countless books, podcasts, articles, and videos, yet often fail to retain or apply the core wisdom they hold. The purpose of **MoreIdea** is to bridge the gap between passive consumption and active application. It provides a centralized, structured repository where users can systematically capture ideas, break them down into their core meanings, and map out exactly how to apply them in real life. By connecting these ideas to specific sources and mentors, the platform ensures that valuable knowledge is never lost but easily accessible when needed.
 
-## 🎯 Overview
+## 🔭 Vision
 
-MoreIdea Backend provides endpoints and services to manage knowledge, specifically focusing on capturing core ideas and their importance from books and videos, managing different mentors and their styles, and saving personal favourite ideas and quotes.
+Our vision is to build an intelligent "second brain" that acts as a personalized wisdom weaver. We want to empower users not just to store data, but to internalize philosophies through the unique lenses of different mentors and archetypes. By capturing the essence of an idea—along with the speaking style, mindset, and body language of the mentor who shared it—MoreIdea aims to foster deeper empathy and understanding, ultimately helping users transform external knowledge into personal growth and actionable insight.
 
-## ✨ Features
+## 💡 Application & Use Cases
 
-- **Source & Idea Management** - Track books and videos and capture core ideas associated with them.
-- **Mentor System** - Store different mentors along with their specific styles, background vibes, and camera angles.
-- **Favourite Ideas** - Keep a dedicated collection of favourite quotes, associated people, and locations.
-- **Robust API** - Built efficiently with NestJS and CQRS patterns.
-- **Database Architecture** - Strongly-typed database interactions using Prisma ORM with PostgreSQL.
-- **File & Media Handling** - Configured for secure file operations.
+MoreIdea is built for practical, everyday use by knowledge workers, coaches, and lifelong learners. Its core applications include:
+
+- **Source & Idea Extraction**: Log the books you read, videos you watch, or podcasts you listen to, and extract specific ideas. For each idea, define its core essence, importance, practical application, and real-world examples.
+- **Mentor Tracking**: Create profiles for different mentors, thought leaders, or historical figures. Track not just their quotes and topics, but their unique philosophy, mindset, teaching style, and archetype.
+- **Thematic Categorization**: Organize ideas and mentors by topics, creating an interconnected web of knowledge that makes it easy to find cross-disciplinary insights.
+- **Personalization**: Users can customize their profiles with personality frameworks (MBTI, Zodiac, Love Languages) to potentially tailor how information and mentorship resonate with them.
+
+---
 
 ## 🛠 Tech Stack
 
 - **Framework**: [NestJS](https://nestjs.com/)
 - **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **ORM**: [Prisma](https://www.prisma.io/)
+- **Architecture**: CQRS Pattern (Command Query Responsibility Segregation)
+- **Database ORM**: [Prisma](https://www.prisma.io/)
 - **Database**: [PostgreSQL](https://www.postgresql.org/)
 - **Authentication**: Passport.js (JWT, Local, Google OAuth2)
 - **Deployment**: Firebase Functions Ready
@@ -44,47 +37,40 @@ MoreIdea Backend provides endpoints and services to manage knowledge, specifical
 
 - **Node.js**: v18.x or higher
 - **PostgreSQL**: v14.x or higher
+- **npm** or **yarn**
 
 ### Installation
 
 1. **Clone the repository**:
-
    ```bash
    git clone <repository-url>
    cd moreidea-be
    ```
 
 2. **Install dependencies**:
-
    ```bash
    npm install
    ```
 
 3. **Configure Environment**:
-   Create a `.env` file and fill in your credentials.
+   Create a `.env` file in the root directory and fill in your credentials:
+   ```env
+   # Database
+   DATABASE_URL="postgresql://user:password@localhost:5432/moreidea?schema=public"
 
-## 🔐 Environment Variables
-
-Key variables required in your `.env` file (adjust as needed based on your configuration):
-
-```env
-# Database
-DATABASE_URL="postgresql://user:password@localhost:5432/moreidea?schema=public"
-
-# Other integrations like JWT, Firebase, AWS, App Secrets, etc., if applicable
-```
+   # JWT & Auth Secrets
+   JWT_SECRET="your_jwt_secret"
+   ```
 
 ## 🗄 Database Setup
 
-MoreIdea uses Prisma for schema management and type safety.
-
-### Running Migrations
+MoreIdea uses Prisma for robust schema management and type safety.
 
 ```bash
 # Generate Prisma Client and NestJS DTOs
 npm run prisma:g
 
-# Apply migrations to development database
+# Apply migrations to the development database
 npm run prisma:m
 
 # Reset database (Deletes all data)
@@ -94,7 +80,7 @@ npm run prisma:reset
 ## ▶️ Running the Application
 
 ```bash
-# Development mode
+# Development mode (watch)
 npm run dev
 
 # Starts the application

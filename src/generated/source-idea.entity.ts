@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { BookVideoSourceEntity } from './book-video-source.entity';
+import { TopicEntity } from './topic.entity';
 
 export class SourceIdeaEntity {
   @ApiProperty({
@@ -10,6 +11,11 @@ export class SourceIdeaEntity {
     type: 'string',
   })
   sourceId: string;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  topicId: string | null;
   @ApiProperty({
     type: 'string',
   })
@@ -26,6 +32,16 @@ export class SourceIdeaEntity {
   importance: string | null;
   @ApiProperty({
     type: 'string',
+    nullable: true,
+  })
+  application: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  example: string | null;
+  @ApiProperty({
+    type: 'string',
     format: 'date-time',
   })
   createdAt: Date;
@@ -39,4 +55,10 @@ export class SourceIdeaEntity {
     required: false,
   })
   source?: BookVideoSourceEntity;
+  @ApiProperty({
+    type: () => TopicEntity,
+    required: false,
+    nullable: true,
+  })
+  topic?: TopicEntity | null;
 }

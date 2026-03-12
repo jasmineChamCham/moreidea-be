@@ -1,4 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { MentorTopicEntity } from './mentor-topic.entity';
+import { BookVideoSourceEntity } from './book-video-source.entity';
+import { MentorQuoteEntity } from './mentor-quote.entity';
 
 export class MentorEntity {
   @ApiProperty({
@@ -11,18 +14,44 @@ export class MentorEntity {
   name: string;
   @ApiProperty({
     type: 'string',
+    nullable: true,
   })
-  style: string;
+  philosophy: string | null;
   @ApiProperty({
     type: 'string',
     nullable: true,
   })
-  bgVibe: string | null;
+  mindset: string | null;
   @ApiProperty({
     type: 'string',
     nullable: true,
   })
-  cameraAngle: string | null;
+  style: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  speakingStyle: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  bodyLanguage: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  bio: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  era: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  archetype: string | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -33,4 +62,22 @@ export class MentorEntity {
     format: 'date-time',
   })
   updatedAt: Date;
+  @ApiProperty({
+    type: () => MentorTopicEntity,
+    isArray: true,
+    required: false,
+  })
+  topics?: MentorTopicEntity[];
+  @ApiProperty({
+    type: () => BookVideoSourceEntity,
+    isArray: true,
+    required: false,
+  })
+  sources?: BookVideoSourceEntity[];
+  @ApiProperty({
+    type: () => MentorQuoteEntity,
+    isArray: true,
+    required: false,
+  })
+  quotes?: MentorQuoteEntity[];
 }

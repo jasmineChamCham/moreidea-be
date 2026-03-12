@@ -25,4 +25,20 @@ export class UpdateSourceIdeaDto {
   @IsOptional()
   @IsString()
   importance?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  application?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  example?: string | null;
 }

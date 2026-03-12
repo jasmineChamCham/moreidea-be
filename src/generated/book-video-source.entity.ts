@@ -1,5 +1,6 @@
 import { SourceType } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { MentorEntity } from './mentor.entity';
 import { SourceIdeaEntity } from './source-idea.entity';
 
 export class BookVideoSourceEntity {
@@ -7,6 +8,11 @@ export class BookVideoSourceEntity {
     type: 'string',
   })
   id: string;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  mentorId: string | null;
   @ApiProperty({
     type: 'string',
   })
@@ -41,6 +47,12 @@ export class BookVideoSourceEntity {
     format: 'date-time',
   })
   updatedAt: Date;
+  @ApiProperty({
+    type: () => MentorEntity,
+    required: false,
+    nullable: true,
+  })
+  mentor?: MentorEntity | null;
   @ApiProperty({
     type: () => SourceIdeaEntity,
     isArray: true,

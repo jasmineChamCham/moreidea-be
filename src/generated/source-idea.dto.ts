@@ -21,6 +21,16 @@ export class SourceIdeaDto {
   importance: string | null;
   @ApiProperty({
     type: 'string',
+    nullable: true,
+  })
+  application: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  example: string | null;
+  @ApiProperty({
+    type: 'string',
     format: 'date-time',
   })
   createdAt: Date;

@@ -11,9 +11,14 @@ export class CreateMentorHandler implements ICommandHandler<CreateMentorCommand>
     return this.dbContext.mentor.create({
       data: {
         name: dto.name,
-        style: dto.style,
-        bgVibe: dto.bgVibe ?? null,
-        cameraAngle: dto.cameraAngle ?? null,
+        philosophy: dto.philosophy ?? null,
+        mindset: dto.mindset ?? null,
+        style: dto.style ?? null,
+        speakingStyle: dto.speakingStyle ?? null,
+        bodyLanguage: dto.bodyLanguage ?? null,
+        bio: dto.bio ?? null,
+        era: dto.era ?? null,
+        archetype: dto.archetype ?? null,
       },
     });
   }

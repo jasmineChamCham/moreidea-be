@@ -12,10 +12,11 @@ export class UpdateMentorDto {
   @ApiProperty({
     type: 'string',
     required: false,
+    nullable: true,
   })
   @IsOptional()
   @IsString()
-  style?: string;
+  philosophy?: string | null;
   @ApiProperty({
     type: 'string',
     required: false,
@@ -23,7 +24,7 @@ export class UpdateMentorDto {
   })
   @IsOptional()
   @IsString()
-  bgVibe?: string | null;
+  mindset?: string | null;
   @ApiProperty({
     type: 'string',
     required: false,
@@ -31,5 +32,45 @@ export class UpdateMentorDto {
   })
   @IsOptional()
   @IsString()
-  cameraAngle?: string | null;
+  style?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  speakingStyle?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  bodyLanguage?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  bio?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  era?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  archetype?: string | null;
 }

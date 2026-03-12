@@ -6,19 +6,45 @@ export class CreateMentorDto {
   @IsString()
   name: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false })
+  @IsOptional()
   @IsString()
-  style: string;
+  philosophy?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  bgVibe?: string;
+  mindset?: string;
 
   @ApiProperty({ required: false })
   @IsOptional()
   @IsString()
-  cameraAngle?: string;
+  style?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  speakingStyle?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  bodyLanguage?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  bio?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  era?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  archetype?: string;
 }
 
 export class CreateMentorCommand {

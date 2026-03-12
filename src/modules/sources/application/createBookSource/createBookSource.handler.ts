@@ -3,12 +3,10 @@ import { CreateBookSourceCommand } from './createBookSource.command';
 import { PrismaService } from 'src/database';
 import { GeminiService } from 'src/modules/gemini/gemini.service';
 import { Logger } from '@nestjs/common';
-import * as pdfParse from 'pdf-parse';
+import { PDFParse } from 'pdf-parse';
 
 @CommandHandler(CreateBookSourceCommand)
-export class CreateBookSourceHandler
-  implements ICommandHandler<CreateBookSourceCommand>
-{
+export class CreateBookSourceHandler implements ICommandHandler<CreateBookSourceCommand> {
   private readonly logger = new Logger(CreateBookSourceHandler.name);
 
   constructor(
@@ -22,8 +20,11 @@ export class CreateBookSourceHandler
     this.logger.log(`Parsing PDF: ${originalFileName}`);
     let pdfText = '';
     try {
-      const parsed = await pdfParse(fileBuffer);
-      pdfText = parsed.text;
+      const parser = new PDFParse({ url: 'https://bitcoin.org/bitcoin.pdf' });
+
+      const result = await parser.getText();
+      const { pages, total, text } = result;
+      pdfText = result.pages.map((page) => page.text).join('\n');
     } catch (e) {
       this.logger.warn(`PDF parse failed, using filename only: ${e.message}`);
       pdfText = `Book file: ${originalFileName}`;
