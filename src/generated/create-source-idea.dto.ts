@@ -1,31 +1,27 @@
-
-import {ApiProperty} from '@nestjs/swagger'
-import {IsNotEmpty,IsOptional,IsString} from 'class-validator'
-
-
-
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateSourceIdeaDto {
   @ApiProperty({
-  type: 'string',
-})
-@IsNotEmpty()
-@IsString()
-ideaText: string ;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-core?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-importance?: string  | null;
+    type: 'string',
+  })
+  @IsNotEmpty()
+  @IsString()
+  ideaText: string;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  core?: string | null;
+  @ApiProperty({
+    type: 'string',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  @IsString()
+  importance?: string | null;
 }
