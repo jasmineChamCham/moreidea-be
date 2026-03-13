@@ -12,7 +12,7 @@ export class CreateBookSourceHandler implements ICommandHandler<CreateBookSource
   constructor(
     private readonly dbContext: PrismaService,
     private readonly geminiService: GeminiService,
-  ) {}
+  ) { }
 
   public async execute(command: CreateBookSourceCommand) {
     const { fileBuffer, originalFileName } = command;
@@ -34,7 +34,6 @@ export class CreateBookSourceHandler implements ICommandHandler<CreateBookSource
     const hintTitle = originalFileName.replace(/\.pdf$/i, '');
     const extracted = await this.geminiService.extractIdeasFromText(
       pdfText,
-      'book',
       hintTitle,
     );
 
@@ -54,6 +53,8 @@ export class CreateBookSourceHandler implements ICommandHandler<CreateBookSource
           ideaText: idea.idea_text,
           core: idea.core || null,
           importance: idea.importance || null,
+          application: idea.application || null,
+          example: idea.example || null,
         })),
       });
     }

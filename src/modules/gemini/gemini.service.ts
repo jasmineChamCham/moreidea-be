@@ -1,13 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { GoogleGenerativeAI } from '@google/generative-ai';
+import { GoogleGenerativeAI, Part } from '@google/generative-ai';
 import { GeminiModel } from 'src/common/enum';
 import { z } from 'zod';
+import { HttpService } from '@nestjs/axios';
+import { firstValueFrom } from 'rxjs';
 
 export interface ExtractedIdea {
   idea_text: string;
   core: string | null;
   importance: string | null;
+  application: string | null;
+  example: string | null;
 }
 
 export interface ExtractionResult {
@@ -21,7 +25,10 @@ export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
   private genAI: GoogleGenerativeAI;
 
-  constructor(private readonly configService: ConfigService) {
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly httpService: HttpService,
+  ) {
     const apiKey = this.configService.get<string>('GEMINI_API_KEY');
     if (!apiKey) throw new Error('GEMINI_API_KEY not found');
     this.genAI = new GoogleGenerativeAI(apiKey);
@@ -29,19 +36,145 @@ export class GeminiService {
 
   async extractIdeasFromText(
     text: string,
-    sourceType: 'book' | 'video',
     hintTitle?: string,
   ): Promise<ExtractionResult> {
-    const model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const model = this.genAI.getGenerativeModel({
+      model: GeminiModel.GEMINI_2_5_FLASH,
+    });
 
-    const prompt = `You are an expert knowledge extractor. Extract key ideas from the following ${sourceType === 'book' ? 'book text' : 'video transcript / description'}.
+    const prompt = `
+You are an expert at extracting knowledge, lessons, and memorable quotes from transcripts of talks, interviews, or videos.
 
-${hintTitle ? `Source title hint: "${hintTitle}"` : ''}
+${hintTitle ? `Source title hint: "${hintTitle}"` : ""}
 
 Text content:
 ---
 ${text.substring(0, 30000)}
 ---
+
+Your task is to extract ALL valuable ideas, insights, lessons, and memorable quotes from the text.
+
+Important rules:
+
+- Extract every meaningful idea, lesson, principle, or insight from the speaker.
+- Prefer the speaker's ORIGINAL WORDS whenever possible.
+- If the speaker says something memorable or powerful, include it as the idea_text exactly as they said it.
+- You may slightly paraphrase only when necessary for clarity.
+- Ignore filler speech, greetings, ads, and repeated content.
+- Do not summarize the entire talk — extract distinct ideas.
+- Do not merge different ideas together.
+- Each idea must represent a single clear insight.
+
+For "core":
+Identify the main theme of the idea such as:
+Psychology, Human Nature, Power, Discipline, Confidence, Relationships, Money, Leadership, Communication, Mindset, Spirituality, etc.
+
+For "importance":
+Explain briefly why the idea matters, or mark it as high / medium / low.
+
+Return ONLY valid JSON with this exact structure:
+
+{
+  "title": "Inferred or confirmed title of the source",
+  "creator": "Speaker or creator name if identifiable, otherwise null",
+  "ideas": [
+    {
+      "idea_text": "The idea or quote from the speaker",
+      "core": "The main theme or concept",
+      "importance": "Why this idea matters or high/medium/low",
+      "application": "How this idea can be applied in real life",
+      "example": "A real-world example or scenario that illustrates the idea"
+    }
+  ]
+}
+
+Requirements:
+
+- Extract as many valuable ideas as possible from the text.
+- Do not artificially limit the number of ideas.
+- Avoid duplicates.
+- Prefer quotes and strong statements made by the speaker.
+- Return ONLY JSON. No explanations.
+`;
+
+    try {
+      const result = await model.generateContent(prompt);
+      const responseText = result.response.text();
+      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) throw new Error('No JSON found in Gemini response');
+      return JSON.parse(jsonMatch[0]) as ExtractionResult;
+    } catch (e) {
+      this.logger.error(`Gemini extraction failed: ${e.message}`);
+      throw e;
+    }
+  }
+
+  async extractIdeasFromVideo(
+    videoUrl: string,
+    hintTitle?: string,
+  ): Promise<ExtractionResult> {
+    const model = this.genAI.getGenerativeModel({
+      model: GeminiModel.GEMINI_2_5_FLASH,
+    });
+
+    const parts: (string | Part)[] = [];
+
+    // Check if it's a YouTube URL
+    const isYouTube = videoUrl.includes('youtube.com') || videoUrl.includes('youtu.be');
+
+    let videoMetadata = '';
+    let videoPart: Part | null = null;
+
+    if (isYouTube) {
+      // For YouTube, fetch transcript using YouTube Data API
+      try {
+        const videoId = this.extractYouTubeVideoId(videoUrl);
+        if (videoId) {
+          const transcript = await this.fetchYouTubeTranscript(videoId);
+          if (transcript) {
+            videoMetadata = `YouTube Video Transcript:\n---\n${transcript}\n---`;
+            this.logger.log(`Successfully fetched YouTube transcript for video ID: ${videoId}`);
+          } else {
+            // Fallback to oEmbed if transcript fails
+            const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+            const response = await firstValueFrom(
+              this.httpService.get(oEmbedUrl)
+            );
+            videoMetadata = JSON.stringify(response.data, null, 2);
+            this.logger.log(`Fetched YouTube metadata as fallback for video ID: ${videoId}`);
+          }
+        }
+      } catch (error) {
+        this.logger.warn(`Failed to fetch YouTube content: ${error.message}`);
+        videoMetadata = `Unable to fetch content for YouTube URL: ${videoUrl}`;
+      }
+    } else {
+      // For non-YouTube URLs, try to download the video directly
+      try {
+        videoPart = await this.fetchMediaAsInlineData(videoUrl);
+        this.logger.log(`Successfully downloaded video from: ${videoUrl}`);
+      } catch (error) {
+        this.logger.warn(`Failed to download video: ${error.message}`);
+        videoMetadata = `Unable to download video from URL: ${videoUrl}`;
+      }
+    }
+
+    const prompt = `You are an expert knowledge extractor. Analyze the provided video content and extract key ideas and insights.
+
+${hintTitle ? `Source title hint: "${hintTitle}"` : ''}
+
+Video URL: ${videoUrl}
+
+${videoMetadata ? `Video Content:\n---\n${videoMetadata}\n---\n\n` : ''}
+
+${isYouTube ? 'This is a YouTube video with the transcript provided above. Please analyze the transcript content thoroughly.' : 'The actual video file is provided for direct analysis.'}
+
+Please analyze the content thoroughly, including:
+- Main topics and themes discussed
+- Key insights and actionable advice
+- Speaker's main arguments or points
+- Any significant examples or case studies
+- Takeaway messages for the audience
 
 Return ONLY valid JSON with this exact structure:
 {
@@ -58,8 +191,14 @@ Return ONLY valid JSON with this exact structure:
 
 Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.`;
 
+    parts.push(prompt);
+
+    if (videoPart) {
+      parts.push(videoPart);
+    }
+
     try {
-      const result = await model.generateContent(prompt);
+      const result = await model.generateContent(parts);
       const responseText = result.response.text();
       const jsonMatch = responseText.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error('No JSON found in Gemini response');
@@ -70,9 +209,244 @@ Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.
     }
   }
 
+  private async fetchYouTubeTranscript(videoId: string): Promise<string | null> {
+    try {
+      // First, try the YouTube Data API method
+      const apiKey = this.configService.get<string>('YOUTUBE_API_KEY');
+      if (apiKey) {
+        try {
+          const transcript = await this.fetchYouTubeTranscriptViaAPI(videoId, apiKey);
+          if (transcript) {
+            this.logger.log(`Successfully fetched YouTube transcript via API for video ID: ${videoId}`);
+            return transcript;
+          }
+        } catch (apiError) {
+          this.logger.warn(`YouTube API failed for video ${videoId}: ${apiError.message}`);
+        }
+      } else {
+        this.logger.warn('YOUTUBE_API_KEY not found, trying alternative method');
+      }
+
+      // Fallback to alternative method (scraping or free service)
+      const fallbackTranscript = await this.fetchYouTubeTranscriptFallback(videoId);
+      if (fallbackTranscript) {
+        this.logger.log(`Successfully fetched YouTube transcript via fallback for video ID: ${videoId}`);
+        return fallbackTranscript;
+      }
+
+      this.logger.warn(`No transcript available for video ${videoId}`);
+      return null;
+
+    } catch (error) {
+      this.logger.error(`Failed to fetch YouTube transcript for ${videoId}: ${error.message}`);
+      return null;
+    }
+  }
+
+  private async fetchYouTubeTranscriptViaAPI(videoId: string, apiKey: string): Promise<string | null> {
+    try {
+      // Get captions list
+      const captionsUrl = `https://www.googleapis.com/youtube/v3/captions?part=snippet&videoId=${videoId}&key=${apiKey}`;
+      const captionsResponse = await firstValueFrom(
+        this.httpService.get(captionsUrl)
+      );
+
+      const items = captionsResponse.data.items;
+      if (!items || items.length === 0) {
+        this.logger.warn(`No captions found for video ${videoId}`);
+        return null;
+      }
+
+      // Find English caption or first available
+      const englishCaption = items.find((item: any) =>
+        item.snippet.language === 'en' || item.snippet.language.startsWith('en')
+      );
+      const captionToUse = englishCaption || items[0];
+
+      if (!captionToUse) {
+        this.logger.warn(`No suitable caption found for video ${videoId}`);
+        return null;
+      }
+
+      // Download caption content
+      const captionUrl = `https://www.googleapis.com/youtube/v3/captions/${captionToUse.id}?key=${apiKey}`;
+      const captionResponse = await firstValueFrom(
+        this.httpService.get(captionUrl, {
+          headers: {
+            'Accept': 'text/vtt'
+          }
+        })
+      );
+
+      // Parse VTT format and extract text
+      return this.parseVTTCaptions(captionResponse.data);
+    } catch (error) {
+      this.logger.error(`YouTube API transcript fetch failed for ${videoId}: ${error.message}`);
+      throw error;
+    }
+  }
+
+  private async fetchYouTubeTranscriptFallback(videoId: string): Promise<string | null> {
+    try {
+      // Use a free transcript service or implement a simple scraper
+      // This is a basic implementation using a public transcript service
+      const transcriptUrl = `https://video.google.com/timedtext?lang=en&v=${videoId}`;
+
+      const response = await firstValueFrom(
+        this.httpService.get(transcriptUrl, {
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+          }
+        })
+      );
+
+      // Parse the XML response
+      return this.parseXMLTranscript(response.data);
+
+    } catch (error) {
+      this.logger.warn(`Fallback transcript fetch failed for ${videoId}: ${error.message}`);
+
+      // As a last resort, try to get basic video info
+      try {
+        const oEmbedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+        const oEmbedResponse = await firstValueFrom(
+          this.httpService.get(oEmbedUrl)
+        );
+
+        return `Video Title: ${oEmbedResponse.data.title}\nAuthor: ${oEmbedResponse.data.author_name}\n\nNote: Transcript not available for this video.`;
+      } catch (oEmbedError) {
+        this.logger.warn(`Even oEmbed fallback failed for ${videoId}: ${oEmbedError.message}`);
+        return null;
+      }
+    }
+  }
+
+  private parseXMLTranscript(xmlContent: string): string {
+    try {
+      // Simple XML parsing for transcript data
+      const textMatches = xmlContent.match(/<text[^>]*>([^<]+)<\/text>/g);
+      if (!textMatches) return '';
+
+      const textLines = textMatches.map(match => {
+        const textContent = match.replace(/<text[^>]*>([^<]+)<\/text>/, '$1');
+        // Decode HTML entities
+        return textContent
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .trim();
+      }).filter(text => text.length > 0);
+
+      return textLines.join(' ');
+    } catch (error) {
+      this.logger.error(`Failed to parse XML transcript: ${error.message}`);
+      return '';
+    }
+  }
+
+  private parseVTTCaptions(vttContent: string): string {
+    try {
+      // Remove VTT header and timing information, extract only text
+      const lines = vttContent.split('\n');
+      const textLines: string[] = [];
+
+      let inCueBlock = false;
+      for (const line of lines) {
+        // Skip VTT header
+        if (line.startsWith('WEBVTT') || line.startsWith('NOTE') || line === '') {
+          continue;
+        }
+
+        // Skip timing lines (contain -->)
+        if (line.includes('-->')) {
+          inCueBlock = true;
+          continue;
+        }
+
+        // Skip position/alignment lines
+        if (line.includes('position:') || line.includes('align:') || line.includes('line:')) {
+          continue;
+        }
+
+        // Extract text content
+        if (inCueBlock && line.trim() && !line.match(/^\d+$/)) {
+          // Remove VTT formatting tags
+          const cleanText = line
+            .replace(/<[^>]*>/g, '') // Remove HTML tags
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .trim();
+
+          if (cleanText) {
+            textLines.push(cleanText);
+          }
+        }
+      }
+
+      return textLines.join(' ');
+    } catch (error) {
+      this.logger.error(`Failed to parse VTT captions: ${error.message}`);
+      return vttContent; // Return raw content if parsing fails
+    }
+  }
+
+  private extractYouTubeVideoId(url: string): string | null {
+    const patterns = [
+      /youtube\.com\/watch\?v=([^&]+)/,
+      /youtube\.com\/embed\/([^?]+)/,
+      /youtube\.com\/v\/([^?]+)/,
+      /youtu\.be\/([^?]+)/,
+      /youtube\.com\/shorts\/([^?]+)/
+    ];
+
+    for (const pattern of patterns) {
+      const match = url.match(pattern);
+      if (match) {
+        return match[1];
+      }
+    }
+
+    return null;
+  }
+
+  private async fetchMediaAsInlineData(url: string): Promise<Part> {
+    try {
+      const response = await firstValueFrom(
+        this.httpService.get(url, {
+          responseType: 'arraybuffer',
+          headers: { 'User-Agent': 'Mozilla/5.0' }
+        })
+      );
+
+      // Convert to base64
+      const base64Data = Buffer.from(response.data).toString('base64');
+
+      // Determine MIME type from URL or default to video/mp4
+      let mimeType = 'video/mp4';
+      if (url.includes('.mp4')) mimeType = 'video/mp4';
+      else if (url.includes('.webm')) mimeType = 'video/webm';
+      else if (url.includes('.mov')) mimeType = 'video/quicktime';
+      else if (url.includes('.avi')) mimeType = 'video/x-msvideo';
+
+      return {
+        inlineData: {
+          mimeType,
+          data: base64Data
+        }
+      };
+    } catch (error) {
+      this.logger.error(`Failed to fetch media from ${url}`, error);
+      throw new Error(`Could not fetch media: ${url}`);
+    }
+  }
+
   async generateMentorData(name: string): Promise<any> {
     const model = this.genAI.getGenerativeModel({
-      model: GeminiModel.GEMINI_3_PRO_PREVIEW,
+      model: GeminiModel.GEMINI_2_5_FLASH,
     });
     const prompt = `You are an expert researching historical, famous, or notable mentors/figures.
 Generate detailed background data for the mentor named "${name}". 
