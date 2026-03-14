@@ -21,13 +21,5 @@ export class CreateQuoteDto {
   })
   @IsOptional()
   @IsString()
-  place?: string | null;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsString()
   photoUrl?: string | null;
 }

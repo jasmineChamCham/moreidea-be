@@ -16,13 +16,5 @@ export class UpdateQuoteDto {
   })
   @IsOptional()
   @IsString()
-  place?: string | null;
-  @ApiProperty({
-    type: 'string',
-    required: false,
-    nullable: true,
-  })
-  @IsOptional()
-  @IsString()
   photoUrl?: string | null;
 }

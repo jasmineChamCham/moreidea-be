@@ -13,7 +13,7 @@ export class CreateQuoteEndpoint {
   @Post()
   public create(@Body() body: CreateQuoteDto) {
     return this.commandBus.execute(
-      new CreateQuoteCommand(body.mentorId, body.quote, body.place, body.photoUrl),
+      new CreateQuoteCommand(body.mentorId, body.quote, body.photoUrl),
     );
   }
 }

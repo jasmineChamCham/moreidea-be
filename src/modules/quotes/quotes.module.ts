@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DatabaseModule } from 'src/database';
+import { GeminiModule } from '../gemini/gemini.module';
 import * as useCases from './application';
 
 const applications = Object.values(useCases);
@@ -10,8 +11,8 @@ const handlers = applications.filter(
 );
 
 @Module({
-  imports: [CqrsModule, DatabaseModule],
+  imports: [CqrsModule, DatabaseModule, GeminiModule],
   controllers: [...endpoints],
   providers: [...handlers],
 })
-export class QuotesModule {}
+export class QuotesModule { }

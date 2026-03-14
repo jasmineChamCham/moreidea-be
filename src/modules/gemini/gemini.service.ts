@@ -425,9 +425,17 @@ Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.
       // Convert to base64
       const base64Data = Buffer.from(response.data).toString('base64');
 
-      // Determine MIME type from URL or default to video/mp4
-      let mimeType = 'video/mp4';
-      if (url.includes('.mp4')) mimeType = 'video/mp4';
+      // Determine MIME type from URL extension
+      let mimeType = 'application/octet-stream'; // Default
+
+      // Image formats
+      if (url.includes('.jpg') || url.includes('.jpeg')) mimeType = 'image/jpeg';
+      else if (url.includes('.png')) mimeType = 'image/png';
+      else if (url.includes('.gif')) mimeType = 'image/gif';
+      else if (url.includes('.webp')) mimeType = 'image/webp';
+      else if (url.includes('.svg')) mimeType = 'image/svg+xml';
+      // Video formats
+      else if (url.includes('.mp4')) mimeType = 'video/mp4';
       else if (url.includes('.webm')) mimeType = 'video/webm';
       else if (url.includes('.mov')) mimeType = 'video/quicktime';
       else if (url.includes('.avi')) mimeType = 'video/x-msvideo';
@@ -441,6 +449,43 @@ Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.
     } catch (error) {
       this.logger.error(`Failed to fetch media from ${url}`, error);
       throw new Error(`Could not fetch media: ${url}`);
+    }
+  }
+
+  async extractQuoteFromImage(imageUrl: string): Promise<string> {
+    const model = this.genAI.getGenerativeModel({
+      model: GeminiModel.GEMINI_2_5_FLASH,
+    });
+
+    try {
+      // Fetch the image as inline data
+      const imagePart = await this.fetchMediaAsInlineData(imageUrl);
+
+      const prompt = `You are an expert at extracting quotes from images. 
+      
+      Analyze the provided image and extract any quote or inspirational text present in it.
+      
+      Rules:
+      - Extract ONLY the quote text, nothing else
+      - If there are multiple quotes, extract the most prominent one
+      - If no quote is found, return "No quote found in this image"
+      - Do not add any explanations or additional text
+      - Return the quote exactly as written in the image
+      
+      The image is provided for analysis.`;
+
+      const parts: (string | Part)[] = [prompt, imagePart];
+
+      const result = await model.generateContent(parts);
+      const responseText = result.response.text();
+
+      // Clean up the response - remove any extra formatting
+      const quote = responseText.trim().replace(/^["']|["']$/g, '');
+
+      return quote;
+    } catch (error) {
+      this.logger.error(`Failed to extract quote from image ${imageUrl}: ${error.message}`);
+      throw new Error(`Could not extract quote from image: ${error.message}`);
     }
   }
 

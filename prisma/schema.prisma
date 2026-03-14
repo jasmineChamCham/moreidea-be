@@ -140,7 +140,6 @@ model Quote {
   id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   mentorId  String   @map("mentor_id") @db.Uuid
   quote     String
-  place     String?
   photoUrl  String?  @map("photo_url")
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
 
