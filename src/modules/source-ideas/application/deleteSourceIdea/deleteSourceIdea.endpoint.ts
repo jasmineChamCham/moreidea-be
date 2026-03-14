@@ -4,9 +4,9 @@ import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { DeleteSourceIdeaCommand } from './deleteSourceIdea.command';
 
 @ApiTags('Source Ideas')
-@Controller({ path: 'ideas', version: '1' })
+@Controller({ path: 'source-ideas', version: '1' })
 export class DeleteSourceIdeaEndpoint {
-  constructor(protected commandBus: CommandBus) {}
+  constructor(protected commandBus: CommandBus) { }
 
   @ApiOperation({ description: 'Delete an idea' })
   @Delete(':id')

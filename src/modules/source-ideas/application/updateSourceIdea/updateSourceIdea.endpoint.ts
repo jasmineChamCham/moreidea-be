@@ -7,9 +7,9 @@ import {
 } from './updateSourceIdea.command';
 
 @ApiTags('Source Ideas')
-@Controller({ path: 'ideas', version: '1' })
+@Controller({ path: 'source-ideas', version: '1' })
 export class UpdateSourceIdeaEndpoint {
-  constructor(protected commandBus: CommandBus) {}
+  constructor(protected commandBus: CommandBus) { }
 
   @ApiOperation({ description: 'Update an idea' })
   @Patch(':id')
