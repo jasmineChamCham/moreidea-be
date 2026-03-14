@@ -461,16 +461,19 @@ Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.
       // Fetch the image as inline data
       const imagePart = await this.fetchMediaAsInlineData(imageUrl);
 
-      const prompt = `You are an expert at extracting quotes from images. 
+      const prompt = `You are an expert at extracting texts from images. 
       
-      Analyze the provided image and extract any quote or inspirational text present in it.
+      Analyze the provided image and extract ALL quotes/text present in it.
       
       Rules:
-      - Extract ONLY the quote text, nothing else
-      - If there are multiple quotes, extract the most prominent one
-      - If no quote is found, return "No quote found in this image"
+      - Extract ONLY the quotes/inspirational text, NOT names or titles
+      - If there are multiple quotes, extract ALL of them
+      - Separate each quote with a newline character
+      - Do NOT include person names, mentor names, or any labels
+      - If no quotes are found, return "No quotes found in this image"
       - Do not add any explanations or additional text
-      - Return the quote exactly as written in the image
+      - Return the quotes exactly as written in the image
+      - Preserve the original formatting and punctuation
       
       The image is provided for analysis.`;
 
