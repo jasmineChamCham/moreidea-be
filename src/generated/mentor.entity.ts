@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MentorTopicEntity } from './mentor-topic.entity';
 import { BookVideoSourceEntity } from './book-video-source.entity';
+import { QuoteEntity } from './quote.entity';
 import { MentorQuoteEntity } from './mentor-quote.entity';
 
 export class MentorEntity {
@@ -80,9 +81,15 @@ export class MentorEntity {
   })
   sources?: BookVideoSourceEntity[];
   @ApiProperty({
+    type: () => QuoteEntity,
+    isArray: true,
+    required: false,
+  })
+  quotes?: QuoteEntity[];
+  @ApiProperty({
     type: () => MentorQuoteEntity,
     isArray: true,
     required: false,
   })
-  quotes?: MentorQuoteEntity[];
+  mentorQuotes?: MentorQuoteEntity[];
 }

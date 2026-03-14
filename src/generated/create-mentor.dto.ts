@@ -5,6 +5,7 @@ export class CreateMentorDto {
   @ApiProperty({
     type: 'string',
   })
+  @IsNotEmpty()
   @IsString()
   name: string;
   @ApiProperty({

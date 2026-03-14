@@ -20,117 +20,6 @@ datasource db {
   provider = "postgresql"
 }
 
-enum MBTI {
-  ISTJ
-  ISFJ
-  INFJ
-  INTJ
-  ISTP
-  ISFP
-  INFP
-  INTP
-  ESTP
-  ESFP
-  ENFP
-  ENTP
-  ESTJ
-  ESFJ
-  ENFJ
-  ENTJ
-
-  @@map("mbti")
-}
-
-enum LoveLanguage {
-  words_of_affirmation
-  acts_of_service
-  receiving_gifts
-  quality_time
-  physical_touch
-
-  @@map("love_language")
-}
-
-enum ZodiacSign {
-  aries
-  taurus
-  gemini
-  cancer
-  leo
-  virgo
-  libra
-  scorpio
-  sagittarius
-  capricorn
-  aquarius
-  pisces
-
-  @@map("zodiac_sign")
-}
-
-enum RelationshipType {
-  friend
-  family
-  colleague
-  partner
-  acquaintance
-  romantic
-  other
-
-  @@map("relationship_type")
-}
-
-enum RoleType {
-  USER
-  ADMIN
-  SUPERADMIN
-
-  @@map("role_type")
-}
-
-enum LoginType {
-  LOCAL
-  GOOGLE
-
-  @@map("login_type")
-}
-
-model User {
-  id                         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  displayName                String?   @map("display_name")
-  avatarUrl                  String?   @map("avatar_url")
-  role                       RoleType  @default(USER) @map("role")
-  email                      String    @unique @map("email")
-  password                   String?   @map("password")
-  isAllowUserData            Boolean   @default(true) @map("is_allow_user_data")
-  isEmailVerified            Boolean   @default(false) @map("is_email_verified")
-  verificationToken          String?   @map("verification_token")
-  verificationTokenExpiresAt DateTime? @map("verification_token_expires_at") @db.Timestamptz(6)
-  loginType                  LoginType @default(LOCAL) @map("login_type")
-
-  mbti          MBTI?          @map("mbti")
-  zodiacSign    ZodiacSign?    @map("zodiac_sign")
-  loveLanguages LoveLanguage[] @default([]) @map("love_languages")
-  createdAt     DateTime       @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt     DateTime       @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  tokens Token[]
-
-  @@map("users")
-}
-
-model Token {
-  id           String @id(map: "pk_token") @default(dbgenerated("uuid_generate_v4()")) @map("id") @db.Uuid
-  deviceId     String @map("device_id")
-  userId       String @map("user_id") @db.Uuid
-  refreshToken String @map("refresh_token") @db.VarChar(255)
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([deviceId, userId], map: "ixuq_token_user_device")
-  @@map("tokens")
-}
-
 model Mentor {
   id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name      String  @unique
@@ -149,9 +38,10 @@ model Mentor {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  topics  MentorTopic[]
-  sources BookVideoSource[]
-  quotes  MentorQuote[]
+  topics       MentorTopic[]
+  sources      BookVideoSource[]
+  quotes       Quote[]
+  mentorQuotes MentorQuote[]
 
   @@map("mentors")
 }
@@ -244,4 +134,17 @@ model MentorQuote {
   mentor Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
 
   @@map("mentor_quotes")
+}
+
+model Quote {
+  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  mentorId  String   @map("mentor_id") @db.Uuid
+  quote     String
+  place     String?
+  photoUrl  String?  @map("photo_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  mentor Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@map("quotes")
 }
