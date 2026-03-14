@@ -6,7 +6,6 @@ import { MentorsModule } from './modules/mentors/mentors.module';
 import { SourcesModule } from './modules/sources/sources.module';
 import { SourceIdeasModule } from './modules/source-ideas/source-ideas.module';
 import { TopicsModule } from './modules/topics/topics.module';
-import { MentorQuotesModule } from './modules/mentor-quotes/mentor-quotes.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
 
 @Module({
@@ -18,7 +17,6 @@ import { QuotesModule } from './modules/quotes/quotes.module';
     SourcesModule,
     SourceIdeasModule,
     TopicsModule,
-    MentorQuotesModule,
     QuotesModule,
   ],
   controllers: [],

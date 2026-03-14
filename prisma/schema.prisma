@@ -38,10 +38,9 @@ model Mentor {
   createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
 
-  topics       MentorTopic[]
-  sources      BookVideoSource[]
-  quotes       Quote[]
-  mentorQuotes MentorQuote[]
+  topics  MentorTopic[]
+  sources BookVideoSource[]
+  quotes  Quote[]
 
   @@map("mentors")
 }
@@ -120,20 +119,6 @@ model SourceIdea {
 
   @@index([sourceId])
   @@map("source_ideas")
-}
-
-model MentorQuote {
-  id       String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  mentorId String @db.Uuid
-
-  quote   String
-  meaning String?
-
-  createdAt DateTime @default(now())
-
-  mentor Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
-
-  @@map("mentor_quotes")
 }
 
 model Quote {
