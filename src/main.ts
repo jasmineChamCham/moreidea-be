@@ -39,7 +39,7 @@ async function bootstrap() {
   );
 
   const config = new DocumentBuilder()
-    .setTitle('Empathy AI API')
+    .setTitle('MoreIdea API')
     .setDescription('API document')
     .setVersion('1.0')
     .addBearerAuth()
