@@ -6,6 +6,44 @@ import { z } from 'zod';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
 
+// Zod schemas for response validation
+const ExtractedIdeaSchema = z.object({
+  idea_text: z.string(),
+  core: z.string().nullish(),
+  importance: z.string().nullish(),
+  application: z.string().nullish(),
+  example: z.string().nullish(),
+});
+
+const ExtractionResultSchema = z.object({
+  title: z.string(),
+  creator: z.string().nullish(),
+  ideas: z.array(ExtractedIdeaSchema),
+}).transform((data) => ({
+  title: data.title,
+  creator: data.creator === undefined ? null : data.creator,
+  ideas: data.ideas.map(idea => ({
+    idea_text: idea.idea_text,
+    core: idea.core === undefined ? null : idea.core,
+    importance: idea.importance === undefined ? null : idea.importance,
+    application: idea.application === undefined ? null : idea.application,
+    example: idea.example === undefined ? null : idea.example,
+  })),
+}));
+
+const MentorDataSchema = z.object({
+  philosophy: z.string(),
+  mindset: z.string(),
+  style: z.string(),
+  speakingStyle: z.string(),
+  bodyLanguage: z.string(),
+  bio: z.string(),
+  era: z.string(),
+  archetype: z.string(),
+});
+
+const QuoteResponseSchema = z.string();
+
 export interface ExtractedIdea {
   idea_text: string;
   core: string | null;
@@ -18,6 +56,17 @@ export interface ExtractionResult {
   title: string;
   creator: string | null;
   ideas: ExtractedIdea[];
+}
+
+export interface MentorData {
+  philosophy: string;
+  mindset: string;
+  style: string;
+  speakingStyle: string;
+  bodyLanguage: string;
+  bio: string;
+  era: string;
+  archetype: string;
 }
 
 @Injectable()
@@ -34,6 +83,33 @@ export class GeminiService {
     this.genAI = new GoogleGenerativeAI(apiKey);
   }
 
+  private async validateAndRetry<T>(
+    schema: z.ZodSchema<T>,
+    responseText: string,
+    operation: () => Promise<string>,
+    maxRetries: number = 2
+  ): Promise<T> {
+    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) {
+      throw new Error('No JSON found in Gemini response');
+    }
+
+    try {
+      const parsedJson = JSON.parse(jsonMatch[0]);
+      return schema.parse(parsedJson);
+    } catch (error) {
+      this.logger.warn(`Validation failed: ${error instanceof Error ? error.message : String(error)}`);
+
+      if (maxRetries > 0) {
+        this.logger.log(`Retrying... (${maxRetries} attempts remaining)`);
+        const retryResponse = await operation();
+        return this.validateAndRetry(schema, retryResponse, operation, maxRetries - 1);
+      }
+
+      throw new Error(`Response validation failed after all retries: ${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+
   async extractIdeasFromText(
     text: string,
     hintTitle?: string,
@@ -42,7 +118,8 @@ export class GeminiService {
       model: GeminiModel.GEMINI_2_5_FLASH,
     });
 
-    const prompt = `
+    const generateResponse = async () => {
+      const prompt = `
 You are an expert at extracting knowledge, lessons, and memorable quotes from transcripts of talks, interviews, or videos.
 
 ${hintTitle ? `Source title hint: "${hintTitle}"` : ""}
@@ -97,14 +174,15 @@ Requirements:
 - Return ONLY JSON. No explanations.
 `;
 
-    try {
       const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in Gemini response');
-      return JSON.parse(jsonMatch[0]) as ExtractionResult;
+      return result.response.text();
+    };
+
+    try {
+      const responseText = await generateResponse();
+      return await this.validateAndRetry(ExtractionResultSchema, responseText, generateResponse);
     } catch (e) {
-      this.logger.error(`Gemini extraction failed: ${e.message}`);
+      this.logger.error(`Gemini extraction failed: ${e instanceof Error ? e.message : String(e)}`);
       throw e;
     }
   }
@@ -145,7 +223,7 @@ Requirements:
           }
         }
       } catch (error) {
-        this.logger.warn(`Failed to fetch YouTube content: ${error.message}`);
+        this.logger.warn(`Failed to fetch YouTube content: ${error instanceof Error ? error.message : String(error)}`);
         videoMetadata = `Unable to fetch content for YouTube URL: ${videoUrl}`;
       }
     } else {
@@ -154,12 +232,13 @@ Requirements:
         videoPart = await this.fetchMediaAsInlineData(videoUrl);
         this.logger.log(`Successfully downloaded video from: ${videoUrl}`);
       } catch (error) {
-        this.logger.warn(`Failed to download video: ${error.message}`);
+        this.logger.warn(`Failed to download video: ${error instanceof Error ? error.message : String(error)}`);
         videoMetadata = `Unable to download video from URL: ${videoUrl}`;
       }
     }
 
-    const prompt = `You are an expert knowledge extractor. Analyze the provided video content and extract key ideas and insights.
+    const generateResponse = async () => {
+      const prompt = `You are an expert knowledge extractor. Analyze the provided video content and extract key ideas and insights.
 
 ${hintTitle ? `Source title hint: "${hintTitle}"` : ''}
 
@@ -184,27 +263,29 @@ Return ONLY valid JSON with this exact structure:
     {
       "idea_text": "A clear, concise key idea from the source",
       "core": "The core theme or concept this idea belongs to (e.g. Habits, Mindset, Leadership)",
-      "importance": "Why this idea matters (high/medium/low or a short sentence)"
+      "importance": "Why this idea matters (high/medium/low or a short sentence)",
+      "application": "How this idea can be applied in real life",
+      "example": "A real-world example or scenario that illustrates the idea"
     }
   ]
 }
 
 Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.`;
 
-    parts.push(prompt);
+      const responseParts: (string | Part)[] = [prompt];
+      if (videoPart) {
+        responseParts.push(videoPart);
+      }
 
-    if (videoPart) {
-      parts.push(videoPart);
-    }
+      const result = await model.generateContent(responseParts);
+      return result.response.text();
+    };
 
     try {
-      const result = await model.generateContent(parts);
-      const responseText = result.response.text();
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in Gemini response');
-      return JSON.parse(jsonMatch[0]) as ExtractionResult;
+      const responseText = await generateResponse();
+      return await this.validateAndRetry(ExtractionResultSchema, responseText, generateResponse);
     } catch (e) {
-      this.logger.error(`Gemini extraction failed: ${e.message}`);
+      this.logger.error(`Gemini extraction failed: ${e instanceof Error ? e.message : String(e)}`);
       throw e;
     }
   }
@@ -457,46 +538,57 @@ Extract between 5 and 20 of the most valuable ideas. Be specific and insightful.
       model: GeminiModel.GEMINI_2_5_FLASH,
     });
 
+    const generateResponse = async () => {
+      try {
+        // Fetch the image as inline data
+        const imagePart = await this.fetchMediaAsInlineData(imageUrl);
+
+        const prompt = `You are an expert at extracting texts from images. 
+        
+        Analyze the provided image and extract ALL quotes/text present in it.
+        
+        Rules:
+        - Extract ONLY the quotes/inspirational text, NOT names or titles
+        - If there are multiple quotes, extract ALL of them
+        - Separate each quote with a newline character
+        - Do NOT include person names, mentor names, or any labels
+        - Do not add any explanations or additional text
+        - Return the quotes exactly as written in the image
+        - Preserve the original formatting and punctuation
+        
+        The image is provided for analysis.`;
+
+        const parts: (string | Part)[] = [prompt, imagePart];
+
+        const result = await model.generateContent(parts);
+        return result.response.text();
+      } catch (error) {
+        this.logger.error(`Failed to extract quote from image ${imageUrl}: ${error instanceof Error ? error.message : String(error)}`);
+        throw new Error(`Could not extract quote from image: ${error instanceof Error ? error.message : String(error)}`);
+      }
+    };
+
     try {
-      // Fetch the image as inline data
-      const imagePart = await this.fetchMediaAsInlineData(imageUrl);
-
-      const prompt = `You are an expert at extracting texts from images. 
-      
-      Analyze the provided image and extract ALL quotes/text present in it.
-      
-      Rules:
-      - Extract ONLY the quotes/inspirational text, NOT names or titles
-      - If there are multiple quotes, extract ALL of them
-      - Separate each quote with a newline character
-      - Do NOT include person names, mentor names, or any labels
-      - If no quotes are found, return "No quotes found in this image"
-      - Do not add any explanations or additional text
-      - Return the quotes exactly as written in the image
-      - Preserve the original formatting and punctuation
-      
-      The image is provided for analysis.`;
-
-      const parts: (string | Part)[] = [prompt, imagePart];
-
-      const result = await model.generateContent(parts);
-      const responseText = result.response.text();
+      const responseText = await generateResponse();
 
       // Clean up the response - remove any extra formatting
-      const quote = responseText.trim().replace(/^["']|["']$/g, '');
+      const cleanedQuote = responseText.trim().replace(/^["']|["']$/g, '');
 
-      return quote;
-    } catch (error) {
-      this.logger.error(`Failed to extract quote from image ${imageUrl}: ${error.message}`);
-      throw new Error(`Could not extract quote from image: ${error.message}`);
+      // Validate using Zod
+      return QuoteResponseSchema.parse(cleanedQuote);
+    } catch (e) {
+      this.logger.error(`Quote extraction failed: ${e instanceof Error ? e.message : String(e)}`);
+      throw e;
     }
   }
 
-  async generateMentorData(name: string): Promise<any> {
+  async generateMentorData(name: string): Promise<MentorData> {
     const model = this.genAI.getGenerativeModel({
       model: GeminiModel.GEMINI_2_5_FLASH,
     });
-    const prompt = `You are an expert researching historical, famous, or notable mentors/figures.
+
+    const generateResponse = async () => {
+      const prompt = `You are an expert researching historical, famous, or notable mentors/figures.
 Generate detailed background data for the mentor named "${name}". 
 
 Return ONLY valid JSON with this exact structure:
@@ -513,25 +605,13 @@ Return ONLY valid JSON with this exact structure:
 
 Ensure the response is ONLY a JSON object and nothing else. If you are unsure, make an educated guess based on their public persona or historical record. If the person is completely unknown, return neutral generic plausible data.`;
 
-    const mentorDataSchema = z.object({
-      philosophy: z.string(),
-      mindset: z.string(),
-      style: z.string(),
-      speakingStyle: z.string(),
-      bodyLanguage: z.string(),
-      bio: z.string(),
-      era: z.string(),
-      archetype: z.string(),
-    });
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    };
 
     try {
-      const result = await model.generateContent(prompt);
-      const responseText = result.response.text();
-      const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) throw new Error('No JSON found in Gemini response');
-
-      const parsedJson = JSON.parse(jsonMatch[0]);
-      return mentorDataSchema.parse(parsedJson);
+      const responseText = await generateResponse();
+      return await this.validateAndRetry(MentorDataSchema, responseText, generateResponse);
     } catch (e) {
       this.logger.error(
         `Gemini generate mentor data failed: ${e instanceof Error ? e.message : String(e)}`,
