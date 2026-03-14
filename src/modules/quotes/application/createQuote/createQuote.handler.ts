@@ -11,7 +11,6 @@ export class CreateQuoteHandler implements ICommandHandler<CreateQuoteCommand> {
       data: {
         mentorId: command.mentorId,
         quote: command.quote,
-        place: command.place,
         photoUrl: command.photoUrl,
       },
     });

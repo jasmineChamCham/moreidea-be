@@ -7,12 +7,6 @@ export class CreateQuoteDto {
   })
   @IsNotEmpty()
   @IsString()
-  mentorId: string;
-  @ApiProperty({
-    type: 'string',
-  })
-  @IsNotEmpty()
-  @IsString()
   quote: string;
   @ApiProperty({
     type: 'string',
