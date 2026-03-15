@@ -40,8 +40,9 @@ export class CreateVideoSourceHandler implements ICommandHandler<CreateVideoSour
       data: {
         sourceTitle: extracted.title || dto.title,
         sourceType: 'video',
-        creator: extracted.creator || null,
+        creator: extracted.creator || dto.creator || null,
         sourceUrl: dto.url || null,
+        mentorId: dto.mentorId || null,
       },
     });
 

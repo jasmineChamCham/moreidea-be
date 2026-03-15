@@ -20,6 +20,16 @@ export class CreateVideoSourceDto {
   @IsOptional()
   @IsString()
   subtitles?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  mentorId?: string;
+
+  @ApiProperty({ required: false })
+  @IsOptional()
+  @IsString()
+  creator?: string;
 }
 
 export class CreateVideoSourceCommand {

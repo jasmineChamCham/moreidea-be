@@ -15,7 +15,7 @@ export class CreateBookSourceHandler implements ICommandHandler<CreateBookSource
   ) { }
 
   public async execute(command: CreateBookSourceCommand) {
-    const { fileBuffer, originalFileName } = command;
+    const { fileBuffer, originalFileName, mentorId, creator } = command;
 
     this.logger.log(`Parsing PDF: ${originalFileName}`);
     let pdfText = '';
@@ -41,8 +41,9 @@ export class CreateBookSourceHandler implements ICommandHandler<CreateBookSource
       data: {
         sourceTitle: extracted.title || hintTitle,
         sourceType: 'book',
-        creator: extracted.creator || null,
+        creator: extracted.creator || creator || null,
         filePath: `pdfs/${Date.now()}_${originalFileName}`,
+        mentorId: mentorId || null,
       },
     });
 
