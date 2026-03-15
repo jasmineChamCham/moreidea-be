@@ -13,47 +13,7 @@ export class MentorDto {
     type: 'string',
     nullable: true,
   })
-  avatarUrl: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  philosophy: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  mindset: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
   style: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  speakingStyle: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  bodyLanguage: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  bio: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  era: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  archetype: string | null;
   @ApiProperty({
     type: 'string',
     format: 'date-time',
@@ -64,4 +24,44 @@ export class MentorDto {
     format: 'date-time',
   })
   updatedAt: Date;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  bio: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  bodyLanguage: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  era: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  mindset: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  philosophy: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  speakingStyle: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  archetype: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  avatarUrl: string | null;
 }

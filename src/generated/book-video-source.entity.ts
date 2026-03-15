@@ -10,11 +10,6 @@ export class BookVideoSourceEntity {
   id: string;
   @ApiProperty({
     type: 'string',
-    nullable: true,
-  })
-  mentorId: string | null;
-  @ApiProperty({
-    type: 'string',
   })
   sourceTitle: string;
   @ApiProperty({
@@ -47,6 +42,11 @@ export class BookVideoSourceEntity {
     format: 'date-time',
   })
   updatedAt: Date;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  mentorId: string | null;
   @ApiProperty({
     type: () => MentorEntity,
     required: false,

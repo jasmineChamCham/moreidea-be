@@ -21,16 +21,6 @@ export class SourceIdeaDto {
   importance: string | null;
   @ApiProperty({
     type: 'string',
-    nullable: true,
-  })
-  application: string | null;
-  @ApiProperty({
-    type: 'string',
-    nullable: true,
-  })
-  example: string | null;
-  @ApiProperty({
-    type: 'string',
     format: 'date-time',
   })
   createdAt: Date;
@@ -39,4 +29,14 @@ export class SourceIdeaDto {
     format: 'date-time',
   })
   updatedAt: Date;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  application: string | null;
+  @ApiProperty({
+    type: 'string',
+    nullable: true,
+  })
+  example: string | null;
 }

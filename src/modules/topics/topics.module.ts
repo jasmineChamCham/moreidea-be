@@ -14,4 +14,4 @@ const handlers = applications.filter(
   controllers: [...endpoints],
   providers: [...handlers],
 })
-export class TopicsModule {}
+export class TopicsModule { }

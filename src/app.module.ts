@@ -7,6 +7,7 @@ import { SourcesModule } from './modules/sources/sources.module';
 import { SourceIdeasModule } from './modules/source-ideas/source-ideas.module';
 import { TopicsModule } from './modules/topics/topics.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
+import { SemanticSearchModule } from './modules/semantic-search/semantic-search.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { QuotesModule } from './modules/quotes/quotes.module';
     SourceIdeasModule,
     TopicsModule,
     QuotesModule,
+    SemanticSearchModule,
   ],
   controllers: [],
   providers: [],

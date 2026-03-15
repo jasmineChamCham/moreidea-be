@@ -1,57 +1,52 @@
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["driverAdapters"]
+  previewFeatures = ["driverAdapters", "postgresqlExtensions"]
 }
 
 generator nestjsDto {
   provider        = "prisma-generator-nestjs-dto"
   output          = "../src/generated"
+  classValidation = "true"
   createDtoPrefix = "Create"
-  updateDtoPrefix = "Update"
   dtoSuffix       = "Dto"
   entityPrefix    = ""
   entitySuffix    = "Entity"
-  classValidation = "true"
   fileNamingStyle = "kebab"
   outputType      = "class"
+  updateDtoPrefix = "Update"
 }
 
 datasource db {
-  provider = "postgresql"
+  provider   = "postgresql"
+  extensions = [pgcrypto, vector]
 }
 
 model Mentor {
-  id        String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name      String  @unique
-  avatarUrl String? @map("avatar_url")
-
-  philosophy    String?
-  mindset       String?
+  id            String            @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name          String            @unique
   style         String?
-  speakingStyle String?
+  createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
+  bio           String?
   bodyLanguage  String?
-
-  bio       String?
-  era       String?
-  archetype String?
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  topics  MentorTopic[]
-  sources BookVideoSource[]
-  quotes  Quote[]
+  era           String?
+  mindset       String?
+  philosophy    String?
+  speakingStyle String?
+  archetype     String?
+  avatarUrl     String?           @map("avatar_url")
+  sources       BookVideoSource[]
+  topics        MentorTopic[]
+  quotes        Quote[]
 
   @@map("mentors")
 }
 
 model Topic {
-  id   String @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name String @unique
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
+  id           String        @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String        @unique
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
   mentorTopics MentorTopic[]
   ideas        SourceIdea[]
 
@@ -61,12 +56,56 @@ model Topic {
 model MentorTopic {
   mentorId String @db.Uuid
   topicId  String @db.Uuid
-
-  mentor Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
-  topic  Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
+  mentor   Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+  topic    Topic  @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@id([mentorId, topicId])
   @@map("mentor_topics")
+}
+
+model BookVideoSource {
+  id          String       @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceTitle String       @map("source_title")
+  sourceType  SourceType   @map("source_type")
+  creator     String?
+  sourceUrl   String?      @map("source_url")
+  filePath    String?      @map("file_path")
+  createdAt   DateTime     @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime     @updatedAt @map("updated_at") @db.Timestamptz(6)
+  mentorId    String?      @map("mentor_id") @db.Uuid
+  mentor      Mentor?      @relation(fields: [mentorId], references: [id])
+  ideas       SourceIdea[]
+
+  @@map("book_video_sources")
+}
+
+model SourceIdea {
+  id          String          @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  sourceId    String          @map("source_id") @db.Uuid
+  ideaText    String          @map("idea_text")
+  core        String?
+  importance  String?
+  createdAt   DateTime        @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime        @updatedAt @map("updated_at") @db.Timestamptz(6)
+  application String?
+  example     String?
+  topicId     String?         @map("topic_id") @db.Uuid
+  source      BookVideoSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
+  topic       Topic?          @relation(fields: [topicId], references: [id])
+
+  @@index([sourceId])
+  @@map("source_ideas")
+}
+
+model Quote {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  mentorId  String   @map("mentor_id") @db.Uuid
+  quote     String
+  photoUrl  String?  @map("photo_url")
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  mentor    Mentor   @relation(fields: [mentorId], references: [id], onDelete: Cascade)
+
+  @@map("quotes")
 }
 
 enum SourceType {
@@ -76,59 +115,4 @@ enum SourceType {
   article
 
   @@map("source_type")
-}
-
-model BookVideoSource {
-  id       String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  mentorId String? @map("mentor_id") @db.Uuid
-
-  sourceTitle String     @map("source_title")
-  sourceType  SourceType @map("source_type")
-
-  creator   String?
-  sourceUrl String? @map("source_url")
-  filePath  String? @map("file_path")
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  mentor Mentor? @relation(fields: [mentorId], references: [id])
-
-  ideas SourceIdea[]
-
-  @@map("book_video_sources")
-}
-
-model SourceIdea {
-  id       String  @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  sourceId String  @map("source_id") @db.Uuid
-  topicId  String? @map("topic_id") @db.Uuid
-
-  ideaText   String  @map("idea_text")
-  core       String?
-  importance String?
-
-  application String?
-  example     String?
-
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
-
-  source BookVideoSource @relation(fields: [sourceId], references: [id], onDelete: Cascade)
-  topic  Topic?          @relation(fields: [topicId], references: [id])
-
-  @@index([sourceId])
-  @@map("source_ideas")
-}
-
-model Quote {
-  id        String   @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  mentorId  String   @map("mentor_id") @db.Uuid
-  quote     String
-  photoUrl  String?  @map("photo_url")
-  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
-
-  mentor Mentor @relation(fields: [mentorId], references: [id], onDelete: Cascade)
-
-  @@map("quotes")
 }

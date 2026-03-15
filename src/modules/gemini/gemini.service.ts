@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { GoogleGenerativeAI, Part } from '@google/generative-ai';
-import { GeminiModel } from 'src/common/enum';
+import { GeminiModel } from '../../common/enum';
 import { z } from 'zod';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';

@@ -263,39 +263,6 @@ async function main() {
     ],
   });
 
-  /*
-   --------------------------------
-   QUOTES
-   --------------------------------
-  */
-
-  await prisma.mentorQuote.createMany({
-    data: [
-      {
-        mentorId: robertGreene.id,
-        quote:
-          'When you show yourself to the world and display your talents, you naturally stir jealousy.',
-      },
-      {
-        mentorId: peterson.id,
-        quote:
-          'Compare yourself to who you were yesterday, not to who someone else is today.',
-      },
-      {
-        mentorId: jung.id,
-        quote:
-          'Until you make the unconscious conscious, it will direct your life and you will call it fate.',
-      },
-      {
-        mentorId: mel.id,
-        quote: 'You are one decision away from a completely different life.',
-      },
-      {
-        mentorId: jay.id,
-        quote: 'Your purpose is often hidden in your pain.',
-      },
-    ],
-  });
 
   console.log('Seed completed.');
 }
