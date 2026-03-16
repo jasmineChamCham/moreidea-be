@@ -32,6 +32,12 @@ export class CreateQuoteHandler implements ICommandHandler<CreateQuoteCommand> {
         new GenerateEmbeddingCommand(command.quote)
       );
 
+      const mentor = await this.dbContext.mentor.findUnique({
+        where: {
+          id: command.mentorId,
+        },
+      });
+
       // Store in Qdrant using CommandBus
       await this.commandBus.execute(
         new UpsertEmbeddingCommand(
@@ -39,8 +45,9 @@ export class CreateQuoteHandler implements ICommandHandler<CreateQuoteCommand> {
           embedding,
           {
             text: command.quote,
+            photoUrl: command.photoUrl || '',
             mentorId: command.mentorId,
-            photoUrl: command.photoUrl,
+            mentorName: mentor?.name || '',
             createdAt: quote.createdAt.toISOString(),
           },
           SearchContentType.QUOTE

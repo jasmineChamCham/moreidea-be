@@ -158,12 +158,14 @@ async function migrateEmbeddings() {
     console.log('Migrating quotes...');
     const quotesQuery = `
       SELECT 
-        id, 
-        quote, 
-        "mentor_id", 
-        "photo_url", 
-        "created_at"
+        quotes.id as id, 
+        quotes.quote as quote, 
+        quotes."mentor_id" as mentor_id, 
+        mentors.name as mentor_name,
+        quotes."photo_url" as photo_url, 
+        quotes."created_at" as created_at
       FROM quotes
+      JOIN mentors ON quotes."mentor_id" = mentors.id
     `;
 
     const quotesResult = await pool.query(quotesQuery);
@@ -176,6 +178,8 @@ async function migrateEmbeddings() {
         // Store in Qdrant with metadata
         await upsertToQdrant('quotes', quote.id, embedding, {
           text: quote.quote,
+          quote: quote.quote,
+          mentorName: quote.mentor_name,
           mentorId: quote.mentor_id,
           photoUrl: quote.photo_url,
           createdAt: quote.created_at.toISOString(),

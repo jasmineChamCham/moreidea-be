@@ -45,13 +45,11 @@ export class SearchRelevantContentHandler implements IQueryHandler<SearchRelevan
     // Process quote results
     const quotes = quoteResults.map(result => ({
       id: result.id,
-      quote: result.payload.quote,
+      quote: result.payload.text,
       photoUrl: result.payload.photoUrl,
       createdAt: result.payload.createdAt,
+      mentorId: result.payload.mentorId,
       mentorName: result.payload.mentorName,
-      style: result.payload.style,
-      speakingStyle: result.payload.speakingStyle,
-      bodyLanguage: result.payload.bodyLanguage,
       similarity: result.score,
       type: SearchContentType.QUOTE
     }));
