@@ -8,6 +8,8 @@ import { SourceIdeasModule } from './modules/source-ideas/source-ideas.module';
 import { TopicsModule } from './modules/topics/topics.module';
 import { QuotesModule } from './modules/quotes/quotes.module';
 import { SemanticSearchModule } from './modules/semantic-search/semantic-search.module';
+import { QdrantModule } from './modules/qdrant/qdrant.module';
+import { EmbeddingsModule } from './modules/embeddings/embeddings.module';
 
 @Module({
   imports: [
@@ -20,6 +22,8 @@ import { SemanticSearchModule } from './modules/semantic-search/semantic-search.
     TopicsModule,
     QuotesModule,
     SemanticSearchModule,
+    QdrantModule,
+    EmbeddingsModule,
   ],
   controllers: [],
   providers: [],

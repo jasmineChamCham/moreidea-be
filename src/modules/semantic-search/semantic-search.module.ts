@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
 import { DatabaseModule } from 'src/database';
+import { QdrantModule } from '../qdrant/qdrant.module';
 import * as useCases from './application';
 
 const applications = Object.values(useCases);
@@ -10,7 +11,7 @@ const handlers = applications.filter(
 );
 
 @Module({
-  imports: [CqrsModule, DatabaseModule],
+  imports: [CqrsModule, DatabaseModule, QdrantModule],
   controllers: [...endpoints],
   providers: [...handlers],
 })

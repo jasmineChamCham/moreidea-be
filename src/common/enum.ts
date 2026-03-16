@@ -1,16 +1,3 @@
-export enum QUEUE_NAME {
-  ANALYSIS_SESSION = 'analysis-session-queue',
-  CHAT_MESSAGE = 'chat-message-queue',
-}
-
-export enum EVENT_NAME {
-  START_CHAT = 'start_chat',
-  JOINED_CONVERSATION = 'joined_conversation',
-  CHAT_ANALYSIS_RESPONSE = 'chat_analysis_response',
-  ANALYSIS_SESSION_COMPLETE = 'analysis_session_complete',
-  CHAT_ANALYSIS_PROGRESS = 'chat_analysis_progress',
-}
-
 export enum GeminiModel {
   GEMINI_2_5_FLASH = 'gemini-2.5-flash',
   GEMINI_2_5_PRO = 'gemini-2.5-pro',
@@ -44,29 +31,7 @@ export enum GeminiModel {
   DEEP_RESEARCH_PRO_PREVIEW_12_2025 = 'deep-research-pro-preview-12-2025',
 }
 
-export const MAPPED_CHAT_MESSAGE_ROLE = {
-  user: 'user',
-  assistant: 'model',
-};
-
-export enum LogAction {
-  LOGIN = 'login',
-  LOGOUT = 'logout',
-  REGISTER = 'register',
-  LOGIN_GOOGLE = 'login_google',
-  UPDATE_USER = 'update_user',
-  DELETE_USER = 'delete_user',
-  CREATE_ANALYSIS_SESSION = 'create_analysis_session',
-  DELETE_ANALYSIS_SESSION = 'delete_analysis_session',
-  CREATE_CHAT_MESSAGE = 'create_chat_message',
-  UPDATE_PROFILES = 'update_profiles',
-  REFINE_ANALYSIS_SESSION = 'refine_analysis_session',
-  UPDATE_ANALYSIS_SESSION = 'update_analysis_session',
-  UPDATE_CHAT_MESSAGE = 'update_chat_message',
-}
-
-export enum LogEntityType {
-  USER = 'User',
-  ANALYSIS_SESSION = 'AnalysisSession',
-  CHAT_MESSAGE = 'ChatMessage',
+export enum SearchContentType {
+  QUOTE = 'quote',
+  SOURCE_IDEA = 'source_idea',
 }

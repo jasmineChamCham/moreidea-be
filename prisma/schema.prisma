@@ -28,11 +28,11 @@ model Mentor {
   createdAt     DateTime          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedAt     DateTime          @updatedAt @map("updated_at") @db.Timestamptz(6)
   bio           String?
-  bodyLanguage  String?
+  bodyLanguage  String?           @map("body_language")
   era           String?
   mindset       String?
   philosophy    String?
-  speakingStyle String?
+  speakingStyle String?           @map("speaking_style")
   archetype     String?
   avatarUrl     String?           @map("avatar_url")
   sources       BookVideoSource[]

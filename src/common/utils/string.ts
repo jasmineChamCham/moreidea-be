@@ -20,3 +20,7 @@ export const hashString = (password: string) => {
 
   return hashedPassword;
 };
+
+export const generateTextForSourceIdea = (ideaText: string, core?: string) => {
+  return `Core: ${core || ''}\nIdea: ${ideaText}`;
+};

@@ -2,6 +2,7 @@ import { ICommandHandler, CommandHandler } from '@nestjs/cqrs';
 import { GenerateEmbeddingsCommand } from './generateEmbeddings.command';
 import { PrismaService } from 'src/database';
 import { pipeline, env } from '@xenova/transformers';
+import { EMBEDDING_MODEL } from 'src/common/constants';
 
 // Disable local model downloads
 env.allowLocalModels = false;
@@ -9,13 +10,12 @@ env.allowLocalModels = false;
 @CommandHandler(GenerateEmbeddingsCommand)
 export class GenerateEmbeddingsHandler implements ICommandHandler<GenerateEmbeddingsCommand> {
   private embeddingPipeline: any = null;
-  private readonly modelName = 'Xenova/all-MiniLM-L6-v2';
 
   constructor(private readonly dbContext: PrismaService) { }
 
   private async getEmbeddingPipeline(): Promise<any> {
     if (!this.embeddingPipeline) {
-      this.embeddingPipeline = await pipeline('feature-extraction', this.modelName);
+      this.embeddingPipeline = await pipeline('feature-extraction', EMBEDDING_MODEL);
     }
     return this.embeddingPipeline;
   }

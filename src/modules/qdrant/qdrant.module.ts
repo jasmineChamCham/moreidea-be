@@ -1,9 +1,6 @@
 import { Module } from '@nestjs/common';
 import { CqrsModule } from '@nestjs/cqrs';
-import { DatabaseModule } from 'src/database';
-import { GeminiModule } from '../gemini/gemini.module';
-import { QdrantModule } from '../qdrant/qdrant.module';
-import { EmbeddingsModule } from '../embeddings/embeddings.module';
+import { QdrantService } from './qdrant.service';
 import * as useCases from './application';
 
 const applications = Object.values(useCases);
@@ -13,8 +10,9 @@ const handlers = applications.filter(
 );
 
 @Module({
-  imports: [CqrsModule, DatabaseModule, GeminiModule, QdrantModule, EmbeddingsModule],
+  imports: [CqrsModule],
   controllers: [...endpoints],
-  providers: [...handlers],
+  providers: [...handlers, QdrantService],
+  exports: [QdrantService],
 })
-export class QuotesModule { }
+export class QdrantModule { }

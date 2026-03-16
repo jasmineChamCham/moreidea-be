@@ -1,7 +1,10 @@
 import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { SearchRelevantContentQuery } from './searchRelevantContent.query';
+import { QdrantService } from '../../../qdrant/qdrant.service';
 import { PrismaService } from 'src/database';
 import { pipeline, env } from '@xenova/transformers';
+import { EMBEDDING_MODEL } from 'src/common/constants';
+import { SearchContentType } from 'src/common/enum';
 
 // Disable local model downloads
 env.allowLocalModels = false;
@@ -9,13 +12,14 @@ env.allowLocalModels = false;
 @QueryHandler(SearchRelevantContentQuery)
 export class SearchRelevantContentHandler implements IQueryHandler<SearchRelevantContentQuery> {
   private embeddingPipeline: any = null;
-  private readonly modelName = 'Xenova/all-MiniLM-L6-v2';
 
-  constructor(private readonly dbContext: PrismaService) { }
+  constructor(
+    private readonly qdrantService: QdrantService
+  ) { }
 
   private async getEmbeddingPipeline(): Promise<any> {
     if (!this.embeddingPipeline) {
-      this.embeddingPipeline = await pipeline('feature-extraction', this.modelName);
+      this.embeddingPipeline = await pipeline('feature-extraction', EMBEDDING_MODEL);
     }
     return this.embeddingPipeline;
   }
@@ -32,54 +36,49 @@ export class SearchRelevantContentHandler implements IQueryHandler<SearchRelevan
     // Generate embedding for the query
     const queryEmbedding = await this.generateEmbedding(searchQuery);
 
-    // Search for similar quotes
-    const quotes = await this.dbContext.$queryRaw`
-      SELECT 
-        q.id,
-        q.quote,
-        q.photo_url as "photoUrl",
-        q.created_at as "createdAt",
-        m.name as "mentorName",
-        m.style,
-        m."speakingStyle" as "speakingStyle",
-        m."bodyLanguage" as "bodyLanguage",
-        1 - (q.embedding <=> ${queryEmbedding}) as similarity
-      FROM quotes q
-      JOIN mentors m ON q.mentor_id = m.id
-      WHERE q.embedding IS NOT NULL
-      ORDER BY q.embedding <=> ${queryEmbedding}
-      LIMIT ${limit}
-    ` as any[];
+    // Search for similar quotes using Qdrant
+    const quoteResults = await this.qdrantService.searchQuotes(queryEmbedding, limit);
 
-    // Search for similar source ideas
-    const sourceIdeas = await this.dbContext.$queryRaw`
-      SELECT 
-        si.id,
-        si.idea_text as "ideaText",
-        si.core,
-        si.importance,
-        si.created_at as "createdAt",
-        m.name as "mentorName",
-        m.style,
-        m."speakingStyle" as "speakingStyle",
-        m."bodyLanguage" as "bodyLanguage",
-        bvs.source_title as "sourceTitle",
-        bvs.source_type as "sourceType",
-        1 - (si.embedding <=> ${queryEmbedding}) as similarity
-      FROM source_ideas si
-      JOIN book_video_sources bvs ON si.source_id = bvs.id
-      LEFT JOIN mentors m ON bvs.mentor_id = m.id
-      WHERE si.embedding IS NOT NULL
-      ORDER BY si.embedding <=> ${queryEmbedding}
-      LIMIT ${limit}
-    ` as any[];
+    // Search for similar source ideas using Qdrant
+    const sourceIdeaResults = await this.qdrantService.searchSourceIdeas(queryEmbedding, limit);
+
+    // Process quote results
+    const quotes = quoteResults.map(result => ({
+      id: result.id,
+      quote: result.payload.quote,
+      photoUrl: result.payload.photoUrl,
+      createdAt: result.payload.createdAt,
+      mentorName: result.payload.mentorName,
+      style: result.payload.style,
+      speakingStyle: result.payload.speakingStyle,
+      bodyLanguage: result.payload.bodyLanguage,
+      similarity: result.score,
+      type: SearchContentType.QUOTE
+    }));
+
+    // Process source idea results
+    const sourceIdeas = sourceIdeaResults.map(result => ({
+      id: result.id,
+      ideaText: result.payload.text,
+      sourceUrl: result.payload.sourceUrl,
+      core: result.payload.core,
+      importance: result.payload.importance,
+      application: result.payload.application,
+      example: result.payload.example,
+      createdAt: result.payload.createdAt,
+      mentorName: result.payload.mentorName,
+      style: result.payload.style,
+      speakingStyle: result.payload.speakingStyle,
+      bodyLanguage: result.payload.bodyLanguage,
+      sourceTitle: result.payload.sourceTitle,
+      sourceType: result.payload.sourceType,
+      similarity: result.score,
+      type: SearchContentType.SOURCE_IDEA
+    }));
 
     // Combine and sort results
-    const combinedResults = [
-      ...quotes.map((q: any) => ({ ...q, type: 'quote' })),
-      ...sourceIdeas.map((si: any) => ({ ...si, type: 'sourceIdea' })),
-    ]
-      .sort((a: any, b: any) => b.similarity - a.similarity)
+    const combinedResults = [...quotes, ...sourceIdeas]
+      .sort((a, b) => b.similarity - a.similarity)
       .slice(0, limit);
 
     return combinedResults;
