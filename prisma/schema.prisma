@@ -108,6 +108,22 @@ model Quote {
   @@map("quotes")
 }
 
+model Content {
+  id           String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title        String
+  platform     String
+  content      String   @db.Text
+  analysis     String   @db.Text
+  bodyLanguage String   @map("body_language") @db.Text
+  toneVoice    String   @map("tone_voice") @db.Text
+  score        Float
+  topic        String
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  @@map("contents")
+}
+
 enum SourceType {
   book
   video

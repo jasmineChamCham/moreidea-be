@@ -10,6 +10,7 @@ import { QuotesModule } from './modules/quotes/quotes.module';
 import { SemanticSearchModule } from './modules/semantic-search/semantic-search.module';
 import { QdrantModule } from './modules/qdrant/qdrant.module';
 import { EmbeddingsModule } from './modules/embeddings/embeddings.module';
+import { ContentsModule } from './modules/contents/contents.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { EmbeddingsModule } from './modules/embeddings/embeddings.module';
     SemanticSearchModule,
     QdrantModule,
     EmbeddingsModule,
+    ContentsModule,
   ],
   controllers: [],
   providers: [],
