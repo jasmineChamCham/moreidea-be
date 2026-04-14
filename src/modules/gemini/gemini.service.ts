@@ -69,6 +69,79 @@ export interface MentorData {
   archetype: string;
 }
 
+const GeneratedContentSchema = z.object({
+  title: z.string(),
+  platform: z.string(),
+  content: z.string(),
+  analysis: z.string(),
+  bodyLanguage: z.string(),
+  toneVoice: z.string(),
+  score: z.number()
+});
+
+export interface GeneratedContent {
+  title: string;
+  platform: string;
+  content: string;
+  analysis: string;
+  bodyLanguage: string;
+  toneVoice: string;
+  score: number;
+}
+
+export const SPEAKING_IDENTITY = `You are an expert in communication, public speaking, and human psychology.
+
+Your role is to analyze videos and help the user develop a speaking style that reflects:
+- Calm authority
+- Emotional intelligence
+- Depth and clarity
+- Subtle but powerful delivery
+
+The user's desired speaking identity is:
+
+**Content Depth:**
+- Inspired by Esther Perel
+- Deep understanding of human behavior, relationships, and emotions
+- Insightful, reflective, psychologically sharp
+
+**Structure & Delivery:**
+- Inspired by Jay Shetty
+- Clear structure: hook → idea → expansion → conclusion
+- Easy to follow but not shallow
+
+**Aesthetic & Presence:**
+- Inspired by Hailey Bieber + Tam Kaur
+- Calm, minimal, effortless
+- Not trying too hard
+- Clean and grounded
+
+**Hook Style:**
+- Inspired by Tam Kaur
+- "Truth that hits"
+- Emotionally relatable
+- Direct but not aggressive
+
+**Important principles:**
+- Do NOT force high energy
+- Avoid overacting or exaggeration
+- Focus on presence, pauses, and intentional delivery
+- Subtle expression is better than dramatic gestures
+
+**When analyzing:**
+- Do NOT rigidly force this style
+- If something works authentically, acknowledge it
+- Prioritize authenticity, clarity, and emotional impact
+
+**Your job is to:**
+1. Analyze speaking quality
+2. Identify strengths
+3. Identify weaknesses
+4. Suggest improvements
+5. Evaluate alignment with desired style
+6. Suggest next steps
+
+Be precise, structured, and honest. Avoid generic advice.`;
+
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
@@ -634,6 +707,58 @@ Ensure the response is ONLY a JSON object and nothing else. If you are unsure, m
     } catch (e) {
       this.logger.error(
         `Gemini generate mentor data failed: ${e instanceof Error ? e.message : String(e)}`,
+      );
+      throw e;
+    }
+  }
+
+  async generateContent(topic: string, platform: string, ideas: any[]): Promise<GeneratedContent> {
+    const model = this.genAI.getGenerativeModel({
+      model: GeminiModel.GEMINI_2_5_PRO,
+    });
+
+    const generateResponse = async () => {
+      const ideasText = ideas.map((idea, i) =>
+        `Idea ${i + 1}:\nType: ${idea.type}\nText: ${idea.text}\nCore: ${idea.core || 'N/A'}\nImportance: ${idea.importance || 'N/A'}\nApplication: ${idea.application || 'N/A'}`
+      ).join('\n\n');
+
+      const prompt = `You are a world-class content creator and ghostwriter.
+Please generate a script/post about: "${topic}"
+
+Platform Format: ${platform} (if Youtube, it should be a medium-to-long form engaging script; if Tiktok, it should be punchy, short, and highly engaging for a vertical short).
+
+Here are some collected ideas and quotes to use as inspiration (you don't have to use all of them, just weave them naturally into the content where appropriate and attribute them properly if it makes sense):
+${ideasText}
+
+IMPORTANT - SPEAKING IDENTITY AND TARGET VIBE:
+${SPEAKING_IDENTITY}
+
+Write the actual content/script itself incorporating the given topic and the vibe above.
+Then, analyze why this content works, provide recommended body language instructions matching this identity, suggest a tone of voice, and give it an estimated score between 0 and 100 on how well it fits.
+
+Return ONLY valid JSON with this exact structure:
+{
+  "title": "A catchy title for the content",
+  "platform": "${platform}",
+  "content": "The actual full script or text of the content generated",
+  "analysis": "Analysis of why this content works and hits the psychological marks",
+  "bodyLanguage": "Recommended body language and gestures to use while delivering",
+  "toneVoice": "Recommended tone of voice for the speaker",
+  "score": 95
+}
+
+Return ONLY valid JSON, no explanations.`;
+
+      const result = await model.generateContent(prompt);
+      return result.response.text();
+    };
+
+    try {
+      const responseText = await generateResponse();
+      return await this.validateAndRetry(GeneratedContentSchema, responseText, generateResponse);
+    } catch (e) {
+      this.logger.error(
+        `Gemini generate content failed: ${e instanceof Error ? e.message : String(e)}`,
       );
       throw e;
     }
