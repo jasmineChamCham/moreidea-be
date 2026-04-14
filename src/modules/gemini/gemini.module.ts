@@ -4,6 +4,7 @@ import { HttpModule } from '@nestjs/axios';
 import { CqrsModule } from '@nestjs/cqrs';
 import { GeminiService } from './gemini.service';
 import * as useCases from './application';
+import { DatabaseModule } from 'src/database';
 
 const applications = Object.values(useCases);
 const endpoints = applications.filter((x) => x.name.endsWith('Endpoint'));
@@ -12,9 +13,9 @@ const handlers = applications.filter(
 );
 
 @Module({
-  imports: [ConfigModule.forRoot(), HttpModule, CqrsModule],
+  imports: [ConfigModule.forRoot(), HttpModule, CqrsModule, DatabaseModule],
   controllers: [...endpoints],
   providers: [GeminiService, ...handlers],
   exports: [GeminiService],
 })
-export class GeminiModule {}
+export class GeminiModule { }
