@@ -114,11 +114,18 @@ export class GeminiService {
     text: string,
     hintTitle?: string,
   ): Promise<ExtractionResult> {
-    const model = this.genAI.getGenerativeModel({
-      model: GeminiModel.GEMINI_2_5_FLASH,
-    });
+    const fallbackModels = [
+      // GeminiModel.GEMINI_2_5_FLASH,
+      GeminiModel.GEMINI_2_5_PRO,
+      GeminiModel.GEMINI_2_5_FLASH_LITE,
+      GeminiModel.GEMINI_3_PRO_PREVIEW,
+    ];
 
-    const generateResponse = async () => {
+    const generateResponse = async (modelName: string) => {
+      const model = this.genAI.getGenerativeModel({
+        model: modelName,
+      });
+
       const prompt = `
 You are an expert at extracting knowledge, lessons, and memorable quotes from transcripts of talks, interviews, or videos.
 
@@ -138,7 +145,7 @@ Important rules:
 - If the speaker says something memorable or powerful, include it as the idea_text exactly as they said it.
 - You may slightly paraphrase only when necessary for clarity.
 - Ignore filler speech, greetings, ads, and repeated content.
-- Do not summarize the entire talk — extract distinct ideas.
+- Do not summarize the entire talk - extract distinct ideas.
 - Do not merge different ideas together.
 - Each idea must represent a single clear insight.
 
@@ -178,13 +185,25 @@ Requirements:
       return result.response.text();
     };
 
-    try {
-      const responseText = await generateResponse();
-      return await this.validateAndRetry(ExtractionResultSchema, responseText, generateResponse);
-    } catch (e) {
-      this.logger.error(`Gemini extraction failed: ${e instanceof Error ? e.message : String(e)}`);
-      throw e;
+    // Retry with different models on 503 Service Unavailable error
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const modelName = fallbackModels[attempt];
+      try {
+        this.logger.log(`Attempting extraction with model: ${modelName} (attempt ${attempt + 1}/3)`);
+        const responseText = await generateResponse(modelName);
+        return await this.validateAndRetry(ExtractionResultSchema, responseText, () => generateResponse(modelName));
+      } catch (e) {
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        this.logger.warn(`Model ${modelName} failed: ${errorMessage}`);
+
+        if (attempt < fallbackModels.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          continue;
+        }
+      }
     }
+
+    throw new Error('All extraction attempts failed');
   }
 
   async extractIdeasFromVideo(
