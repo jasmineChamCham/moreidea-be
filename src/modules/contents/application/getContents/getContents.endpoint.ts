@@ -3,7 +3,7 @@ import { QueryBus } from '@nestjs/cqrs';
 import { GetContentsQuery } from './getContents.query';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-@Controller('contents')
+@Controller({ path: 'contents', version: '1' })
 export class GetContentsEndpoint {
   constructor(private readonly queryBus: QueryBus) { }
 
