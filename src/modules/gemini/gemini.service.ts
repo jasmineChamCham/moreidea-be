@@ -815,29 +815,42 @@ Ensure the response is ONLY a JSON object and nothing else. If you are unsure, m
         )
         .join('\n\n');
 
-      const prompt = `You are a world-class content creator and ghostwriter.
-Please generate a script/post about: "${topic}"
+      const prompt = `You are a master psychologist and content strategist who understands human behavior deeply.
+Create compelling content about: "${topic}"
 
 Platform Format: ${platform} (if Youtube, it should be a medium-to-long form engaging script; if Tiktok, it should be punchy, short, and highly engaging for a vertical short).
 
-Here are some collected ideas and quotes to use as inspiration (you don't have to use all of them, just weave them naturally into the content where appropriate and attribute them properly if it makes sense):
+PSYCHOLOGICAL APPROACH:
+- Start with an irresistible hook that triggers curiosity or emotion
+- Use simple, everyday language 90% of the time - make anyone feel understood
+- Sprinkle in occasional "wow" words that create moments of insight or wonder
+- Focus on universal human truths and psychological triggers
+- Make the audience feel seen, heard, and deeply understood
+
+IDEA INSPIRATION (use only if they enhance the content):
 ${ideasText}
 
 IMPORTANT - SPEAKING IDENTITY AND TARGET VIBE:
 ${SPEAKING_IDENTITY}
 
-Write the actual content/script itself incorporating the given topic and the vibe above.
-Then, analyze why this content works, provide recommended body language instructions matching this identity, suggest a tone of voice, and give it an estimated score between 0 and 100 on how well it fits.
+Your mission: Create content that makes people stop scrolling and think "Wow, that's exactly how I feel" or "I never thought of it that way."
+
+Generate the content using psychological principles:
+- Pattern interruption for attention
+- Emotional resonance for connection  
+- Cognitive dissonance for engagement
+- Social proof for credibility
+- Storytelling for memory retention
 
 Return ONLY valid JSON with this exact structure:
 {
-  "title": "A catchy title for the content",
+  "title": "A psychologically compelling title that creates curiosity",
   "platform": "${platform}",
-  "content": "The actual full script or text of the content generated",
-  "analysis": "Analysis of why this content works and hits the psychological marks",
-  "bodyLanguage": "Recommended body language and gestures to use while delivering",
-  "toneVoice": "Recommended tone of voice for the speaker",
-  "score": 95
+  "content": "The full script using simple language with occasional impactful words, strong hooks, and psychological depth",
+  "analysis": "Psychological analysis of why this content works - what triggers it activates, why it resonates emotionally, and how it creates impact",
+  "bodyLanguage": "Body language that enhances psychological connection and authenticity",
+  "toneVoice": "Voice tone that builds trust and emotional resonance",
+  "score": "The score of the content that can attract audience attention and engagement"
 }
 
 Return ONLY valid JSON, no explanations.`;
