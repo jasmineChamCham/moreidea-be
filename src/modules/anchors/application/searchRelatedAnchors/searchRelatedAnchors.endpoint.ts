@@ -2,10 +2,12 @@ import { Controller, Post, Body } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { SearchRelatedAnchorsQuery } from './searchRelatedAnchors.query';
 import { SearchRelatedAnchorsQueryResponse } from './searchRelatedAnchors.query';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('anchors')
+@ApiTags('Anchors')
+@Controller({ path: 'anchors', version: '1' })
 export class SearchRelatedAnchorsEndpoint {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly queryBus: QueryBus) { }
 
   @Post('search')
   async execute(@Body() body: { searchText: string }): Promise<SearchRelatedAnchorsQueryResponse> {

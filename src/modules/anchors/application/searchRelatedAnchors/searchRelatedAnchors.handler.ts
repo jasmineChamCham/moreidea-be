@@ -1,8 +1,9 @@
-import { IQueryHandler } from '@nestjs/cqrs';
+import { IQueryHandler, QueryHandler } from '@nestjs/cqrs';
 import { SearchRelatedAnchorsQuery, SearchRelatedAnchorsQueryResponse } from './searchRelatedAnchors.query';
 import { QdrantService } from 'src/modules/qdrant/qdrant.service';
 import { EmbeddingsService } from 'src/modules/embeddings/embeddings.service';
 
+@QueryHandler(SearchRelatedAnchorsQuery)
 export class SearchRelatedAnchorsHandler implements IQueryHandler<SearchRelatedAnchorsQuery, SearchRelatedAnchorsQueryResponse> {
   constructor(
     private readonly qdrantService: QdrantService,

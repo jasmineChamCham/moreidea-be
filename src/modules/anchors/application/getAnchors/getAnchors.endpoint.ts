@@ -2,10 +2,12 @@ import { Controller, Get } from '@nestjs/common';
 import { QueryBus } from '@nestjs/cqrs';
 import { GetAnchorsQuery } from './getAnchors.query';
 import { GetAnchorsQueryResponse } from './getAnchors.query';
+import { ApiTags } from '@nestjs/swagger';
 
-@Controller('anchors')
+@ApiTags('Anchors')
+@Controller({ path: 'anchors', version: '1' })
 export class GetAnchorsEndpoint {
-  constructor(private readonly queryBus: QueryBus) {}
+  constructor(private readonly queryBus: QueryBus) { }
 
   @Get()
   async execute(): Promise<GetAnchorsQueryResponse> {
