@@ -10,6 +10,7 @@ export class QdrantService {
   // Collection names for different entity types
   private readonly QUOTES_COLLECTION = 'quotes';
   private readonly SOURCE_IDEAS_COLLECTION = 'source_ideas';
+  private readonly ANCHORS_COLLECTION = 'anchors';
 
   constructor() {
     this.client = new QdrantClient({
@@ -28,6 +29,9 @@ export class QdrantService {
 
       // Initialize source ideas collection
       await this.createCollectionIfNotExists(this.SOURCE_IDEAS_COLLECTION);
+
+      // Initialize anchors collection
+      await this.createCollectionIfNotExists(this.ANCHORS_COLLECTION);
 
       this.logger.log('Qdrant collections initialized successfully');
     } catch (error) {
@@ -109,11 +113,42 @@ export class QdrantService {
     });
   }
 
+  async upsertAnchor(id: string, embedding: number[], metadata: any) {
+    await this.client.upsert(this.ANCHORS_COLLECTION, {
+      points: [
+        {
+          id,
+          vector: embedding,
+          payload: metadata,
+        },
+      ],
+    });
+  }
+
+  async searchAnchors(queryEmbedding: number[], limit: number = 100) {
+    const response = await this.client.search(this.ANCHORS_COLLECTION, {
+      vector: queryEmbedding,
+      limit,
+      with_payload: true,
+    });
+    return response;
+  }
+
+  async deleteAnchor(id: string) {
+    await this.client.delete(this.ANCHORS_COLLECTION, {
+      points: [id],
+    });
+  }
+
   getQuotesCollectionName() {
     return this.QUOTES_COLLECTION;
   }
 
   getSourceIdeasCollectionName() {
     return this.SOURCE_IDEAS_COLLECTION;
+  }
+
+  getAnchorsCollectionName() {
+    return this.ANCHORS_COLLECTION;
   }
 }

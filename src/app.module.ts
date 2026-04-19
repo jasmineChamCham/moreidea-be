@@ -11,10 +11,12 @@ import { SemanticSearchModule } from './modules/semantic-search/semantic-search.
 import { QdrantModule } from './modules/qdrant/qdrant.module';
 import { EmbeddingsModule } from './modules/embeddings/embeddings.module';
 import { ContentsModule } from './modules/contents/contents.module';
+import { AnchorsModule } from './modules/anchors/anchors.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    AnchorsModule,
     PassportModule,
     GeminiModule,
     MentorsModule,
