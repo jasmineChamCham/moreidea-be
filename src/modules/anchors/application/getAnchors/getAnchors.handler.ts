@@ -8,7 +8,7 @@ export class GetAnchorsHandler implements IQueryHandler<GetAnchorsQuery, GetAnch
 
   async execute(query: GetAnchorsQuery): Promise<GetAnchorsQueryResponse> {
     const anchors = await this.prisma.anchor.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'asc' }
     });
 
     return new GetAnchorsQueryResponse(anchors);
